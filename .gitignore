@@ -1,0 +1,42 @@
+# Environment / secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Whisper model cache (downloaded fresh by Actions)
+.whisper-cache/
+models/
+
+# Audio downloads (transient)
+audio/
+*.mp3
+*.wav
+*.m4a
+
+# Transcript scratch
+*.vtt
+*.srt
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
