@@ -1,0 +1,33 @@
+Podcast Tracker — {{ run_date }} — {{ entries|length }} new
+
+{% for entry in entries %}
+═══════════════════════════════════════════════════════════════════
+{{ entry.episode.candidate.match_type|replace("_", " ")|upper }}{% if entry.episode.candidate.match_query %} · {{ entry.episode.candidate.match_query }}{% endif %}
+
+{{ entry.episode.candidate.title }}
+{{ entry.episode.candidate.podcast }} · {{ entry.episode.candidate.published_at.strftime("%b %-d, %Y") }}{% if entry.episode.candidate.duration_minutes %} · {{ "%.0f"|format(entry.episode.candidate.duration_minutes) }} min{% endif %}
+
+{% if entry.summary %}
+{{ entry.summary.headline }}
+
+{% for bullet in entry.summary.bullets %}
+[{{ bullet.category }}] {{ bullet.point }}
+{% endfor %}
+
+{% if entry.summary.open_questions %}
+Open questions:
+{% for q in entry.summary.open_questions %}
+  - {{ q }}
+{% endfor %}
+{% endif %}
+{% elif entry.error %}
+Processing error: {{ entry.error }}
+{% else %}
+Transcript unavailable. Link only.
+{% endif %}
+
+Listen: {{ entry.episode.candidate.episode_url }}
+
+{% else %}
+No new matches in the last 24 hours.
+{% endfor %}
