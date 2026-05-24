@@ -36,6 +36,7 @@ class EpisodeCandidate:
     match_type: MatchType
     match_query: str  # the name or company alias that produced this candidate
     discovered_via: str  # "podcastindex_byperson" / "rss" / "exa"
+    spotify_url: str | None = None  # enriched later via Spotify Web API
 
 
 @dataclass
@@ -58,17 +59,14 @@ class Transcript:
 @dataclass
 class SummaryPoint:
     n: int
-    category: str  # STRATEGY / HIRING / MARKET / TECHNICAL / QUOTE / FINANCIAL / PERSONNEL / PRODUCT
     point: str
-    evidence: str = ""
-    segment: str = "middle"  # beginning / middle / end
 
 
 @dataclass
 class Summary:
-    headline: str
     bullets: list[SummaryPoint]
-    open_questions: list[str] = field(default_factory=list)
+    guests: list[str] = field(default_factory=list)
+    guest_role_and_company: str = ""
     transcript_completeness: str = "complete"  # complete / partial / low_quality
 
 

@@ -73,6 +73,13 @@ def _xml_escape(s: str) -> str:
     )
 
 
+def _title_contains_query(candidate: EpisodeCandidate) -> bool:
+    """Title-literal match: query appears in the title, case-insensitively, as a substring."""
+    if not candidate.match_query:
+        return False
+    return candidate.match_query.lower() in (candidate.title or "").lower()
+
+
 def classify(
     candidates: list[EpisodeCandidate],
     *,
@@ -81,17 +88,31 @@ def classify(
 ) -> list[Episode]:
     """Classify candidates in one batched Haiku call. Return only those in `keep`.
 
-    Specific-podcast matches bypass the filter — they're trusted by definition.
+    Three fast-paths skip Haiku entirely:
+      1. Specific-podcast matches are trusted by definition.
+      2. Title contains the literal query (very strong guest signal).
+      3. After both, the remainder go to Haiku for batch classification.
     """
     bypass = [c for c in candidates if c.match_type == "specific_podcast"]
-    needs_filter = [c for c in candidates if c.match_type != "specific_podcast"]
+    remaining = [c for c in candidates if c.match_type != "specific_podcast"]
 
-    episodes: list[Episode] = [
-        Episode(candidate=c, filter_confidence=1.0, priority_score=0.0)
-        for c in bypass
-    ]
+    title_match = [c for c in remaining if _title_contains_query(c)]
+    needs_filter = [c for c in remaining if not _title_contains_query(c)]
+
+    episodes: list[Episode] = []
+    for c in bypass:
+        episodes.append(Episode(candidate=c, filter_confidence=1.0, priority_score=0.0))
+    for c in title_match:
+        episodes.append(Episode(candidate=c, filter_confidence=0.95, priority_score=0.0))
 
     if not needs_filter:
+        logger.info(
+            "filter fast-paths consumed all candidates",
+            extra={
+                "bypassed": len(bypass),
+                "title_matched": len(title_match),
+            },
+        )
         return episodes
 
     client = client or anthropic.Anthropic()

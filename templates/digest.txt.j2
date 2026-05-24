@@ -1,32 +1,29 @@
-Podcast Tracker — {{ run_date }} — {{ entries|length }} new
+{{ heading }}
 
-{% for entry in entries %}
+{% for ctx in contexts %}
 ═══════════════════════════════════════════════════════════════════
-{{ entry.episode.candidate.match_type|replace("_", " ")|upper }}{% if entry.episode.candidate.match_query %} · {{ entry.episode.candidate.match_query }}{% endif %}
+## {{ ctx.n }}. {{ ctx.podcast }}{% if ctx.has_guest %}: {{ ctx.header_guest }}{% endif %}
 
-{{ entry.episode.candidate.title }}
-{{ entry.episode.candidate.podcast }} · {{ entry.episode.candidate.published_at.strftime("%b %-d, %Y") }}{% if entry.episode.candidate.duration_minutes %} · {{ "%.0f"|format(entry.episode.candidate.duration_minutes) }} min{% endif %}
-
-{% if entry.summary %}
-{{ entry.summary.headline }}
-
-{% for bullet in entry.summary.bullets %}
-[{{ bullet.category }}] {{ bullet.point }}
-{% endfor %}
-
-{% if entry.summary.open_questions %}
-Open questions:
-{% for q in entry.summary.open_questions %}
-  - {{ q }}
-{% endfor %}
+Podcast: {{ ctx.podcast }}
+Episode: {{ ctx.episode_title }}
+Guests: {{ ctx.guests_display }}
+{% if ctx.role_and_company %}
+Company / role: {{ ctx.role_and_company }}
 {% endif %}
-{% elif entry.error %}
-Processing error: {{ entry.error }}
+Date: {{ ctx.date_display }}
+Link: {{ ctx.primary_url if ctx.primary_url else "—" }}
+
+{% if ctx.entry.summary %}
+### Summary
+
+{% for bullet in ctx.entry.summary.bullets %}
+- {{ bullet.point }}
+{% endfor %}
+{% elif ctx.entry.error %}
+Processing error: {{ ctx.entry.error }}
 {% else %}
 Transcript unavailable. Link only.
 {% endif %}
-
-Listen: {{ entry.episode.candidate.episode_url }}
 
 {% else %}
 No new matches in the last 24 hours.

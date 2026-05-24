@@ -1,12 +1,12 @@
 """Discovery: find new podcast episodes matching the watchlist.
 
 Three surfaces:
-  - PodcastIndex `byperson` for both people AND company aliases
+  - iTunes Search API for both people AND company aliases (free, no auth,
+    actual full-text episode search — PodcastIndex byperson only matches
+    feeds that publish <podcast:person> tags, which is far too sparse)
   - Direct RSS feed polling for specific podcasts (via feedparser)
-  - Exa search as a fallback for podcasts not yet in PodcastIndex
-
-Phase 1: minimal — one name through PodcastIndex, one RSS feed, Exa wrapper.
-Phase 2: full async fan-out over the whole watchlist.
+  - PodcastIndex is used for OPTIONAL transcript-URL enrichment (its
+    transcripts[] field is the canonical Tier-0 transcript lookup)
 """
 from __future__ import annotations
 
@@ -28,6 +28,7 @@ from .models import EpisodeCandidate, MatchType
 logger = logging.getLogger(__name__)
 
 PODCASTINDEX_BASE = "https://api.podcastindex.org/api/1.0"
+ITUNES_SEARCH_BASE = "https://itunes.apple.com/search"
 USER_AGENT = "podcast-tracker/0.1 (+https://github.com/jonkarolczak/podcast-tracker)"
 DEFAULT_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
@@ -117,6 +118,82 @@ async def search_byperson(
         if (item.get("datePublished") or 0) < cutoff:
             continue
         candidates.append(_episode_from_podcastindex_item(item, match_type, query))
+    return candidates
+
+
+# --- iTunes Search ----------------------------------------------------------
+
+def _episode_from_itunes_result(
+    item: dict[str, Any],
+    match_type: MatchType,
+    match_query: str,
+) -> EpisodeCandidate | None:
+    """iTunes results give us track + collection metadata but no audio enclosure URL.
+    Use trackId as GUID and trackViewUrl as episode_url. We can enrich with the
+    RSS feed (feedUrl) later if Whisper transcription is needed.
+    """
+    track_id = item.get("trackId")
+    if not track_id:
+        return None
+    release = item.get("releaseDate")
+    if not release:
+        return None
+    try:
+        published_at = datetime.fromisoformat(release.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    duration_ms = item.get("trackTimeMillis") or 0
+    return EpisodeCandidate(
+        guid=f"itunes:{track_id}",
+        title=item.get("trackName") or "",
+        description=item.get("description") or item.get("longDescription") or "",
+        podcast=item.get("collectionName") or "",
+        podcast_feed_id=None,
+        published_at=published_at,
+        duration_minutes=duration_ms / 60_000.0,
+        episode_url=item.get("trackViewUrl") or "",
+        audio_url=item.get("episodeUrl"),  # iTunes sometimes exposes a direct mp3 here
+        youtube_url=None,
+        podcast_transcript_url=None,
+        podcast_transcript_type=None,
+        match_type=match_type,
+        match_query=match_query,
+        discovered_via="itunes_search",
+    )
+
+
+async def search_itunes(
+    client: httpx.AsyncClient,
+    query: str,
+    *,
+    match_type: MatchType,
+    max_results: int = 25,
+    lookback_hours: int = 26,
+) -> list[EpisodeCandidate]:
+    """iTunes Search API — free, no auth, true full-text episode search."""
+    params = {
+        "term": query,
+        "entity": "podcastEpisode",
+        "media": "podcast",
+        "limit": max_results,
+    }
+    resp = await client.get(
+        ITUNES_SEARCH_BASE,
+        params=params,
+        timeout=DEFAULT_TIMEOUT,
+        headers={"User-Agent": USER_AGENT},
+    )
+    resp.raise_for_status()
+    items = resp.json().get("results") or []
+    cutoff = datetime.now(timezone.utc).timestamp() - lookback_hours * 3600
+    candidates: list[EpisodeCandidate] = []
+    for item in items:
+        cand = _episode_from_itunes_result(item, match_type, query)
+        if cand is None:
+            continue
+        if cand.published_at.timestamp() < cutoff:
+            continue
+        candidates.append(cand)
     return candidates
 
 

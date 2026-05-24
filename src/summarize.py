@@ -37,13 +37,18 @@ URL_RE = re.compile(r"https?://\S+")
 
 EMIT_SUMMARY_TOOL = {
     "name": "emit_summary",
-    "description": "Emit the structured 15-point podcast summary.",
+    "description": "Emit the structured podcast summary.",
     "input_schema": {
         "type": "object",
         "properties": {
-            "headline": {
+            "guests": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Full names of all guests interviewed on the episode. Empty array if hosts-only.",
+            },
+            "guest_role_and_company": {
                 "type": "string",
-                "description": "One sentence, max 20 words, naming the most important specific takeaway.",
+                "description": "Primary guest's current role and company (e.g., 'CEO of OpenAI'). When multiple guests, summarize the most prominent one. Empty string if not stated.",
             },
             "transcript_completeness": {
                 "type": "string",
@@ -51,36 +56,20 @@ EMIT_SUMMARY_TOOL = {
             },
             "bullets": {
                 "type": "array",
-                "minItems": 10,
+                "minItems": 1,
                 "maxItems": 18,
                 "items": {
                     "type": "object",
                     "properties": {
                         "n": {"type": "integer"},
-                        "category": {
-                            "type": "string",
-                            "enum": [
-                                "STRATEGY", "HIRING", "MARKET", "TECHNICAL",
-                                "QUOTE", "FINANCIAL", "PERSONNEL", "PRODUCT",
-                            ],
-                        },
                         "point": {"type": "string"},
-                        "evidence": {"type": "string"},
-                        "segment": {
-                            "type": "string",
-                            "enum": ["beginning", "middle", "end"],
-                        },
                     },
-                    "required": ["n", "category", "point", "segment"],
+                    "required": ["n", "point"],
                 },
-            },
-            "open_questions": {
-                "type": "array",
-                "maxItems": 3,
-                "items": {"type": "string"},
+                "description": "Up to 15 concise, standalone bullets prioritizing concrete claims, facts, funding events, product launches, strategy comments, market structure comments, and direct quotes. No category labels.",
             },
         },
-        "required": ["headline", "transcript_completeness", "bullets"],
+        "required": ["transcript_completeness", "bullets"],
     },
 }
 
@@ -111,32 +100,10 @@ def _build_user_message(episode: Episode, transcript: Transcript) -> str:
         "<untrusted_transcript>\n"
         f"{transcript_text}\n"
         "</untrusted_transcript>\n\n"
-        "Produce a structured ~15-point summary of this episode.\n\n"
-        "Step 1 — Internal extraction:\n"
-        "- Identify 20-25 candidate passages from the transcript: any moment with a specific claim,\n"
-        "  named entity, number, decision, hiring signal, product detail, strategic framing,\n"
-        "  contrarian view, confession, or quotable line.\n"
-        "- For each candidate, note which third of the transcript it falls in.\n\n"
-        "Step 2 — Draft ~15 bullets:\n"
-        "- At least 3 bullets must come from each third (coverage spread).\n"
-        "- Order by importance, not chronology.\n"
-        "- Each bullet must contain at least one of: a named company, named person, specific number,\n"
-        "  specific product or feature, direct decision, or verbatim short quote.\n"
-        "- Assign exactly one category from STRATEGY / HIRING / MARKET / TECHNICAL / QUOTE /\n"
-        "  FINANCIAL / PERSONNEL / PRODUCT.\n\n"
-        "Step 3 — Self-revision:\n"
-        "- If any two bullets cover the same claim in different words, replace the weaker one.\n"
-        "- If any bullet starts with \"The guest discussed\", \"They talked about\", \"An interesting\n"
-        "  conversation\", or \"A deep dive into\", rewrite it to lead with the specific claim.\n"
-        "- If any bullet contains a number or named entity you cannot locate in the transcript, remove it.\n\n"
-        "Hard rules:\n"
-        "- No speculation about implications. Report what was said.\n"
-        "- No filler adverbs: \"quietly\", \"deeply\", \"fundamentally\", \"remarkably\", \"arguably\",\n"
-        "  \"notably\", \"interestingly\".\n"
-        "- No \"It's not X — it's Y\" framing.\n"
-        "- Maximum 35 words per bullet.\n"
-        "- Direct quotes use straight double-quotes and must be verbatim.\n"
-        "- If the transcript is incomplete, produce fewer bullets rather than padding.\n"
+        "Produce the structured summary via the emit_summary tool. Follow the guidelines in the system "
+        "prompt: concise standalone bullets, no category labels, up to 15 points, fewer if the episode "
+        "doesn't have 15 substantive ones. Mark host speculation explicitly. Identify guest_name and "
+        "guest_role_and_company if clear from the transcript.\n"
     )
 
 
@@ -165,18 +132,12 @@ def _post_filter_summary(summary: Summary) -> Summary:
         if any(p.match(cleaned_point) for p in FORBIDDEN_OPENERS):
             logger.info("dropped bullet with forbidden opener: %r", cleaned_point[:80])
             continue
-        cleaned.append(SummaryPoint(
-            n=n,
-            category=b.category,
-            point=cleaned_point,
-            evidence=_clean_bullet(b.evidence),
-            segment=b.segment,
-        ))
+        cleaned.append(SummaryPoint(n=n, point=cleaned_point))
         n += 1
     return Summary(
-        headline=_clean_bullet(summary.headline),
         bullets=cleaned,
-        open_questions=[_clean_bullet(q) for q in summary.open_questions if _clean_bullet(q)],
+        guests=[_clean_bullet(g) for g in summary.guests if _clean_bullet(g)],
+        guest_role_and_company=_clean_bullet(summary.guest_role_and_company),
         transcript_completeness=summary.transcript_completeness,
     )
 
@@ -185,17 +146,14 @@ def _summary_from_tool_input(payload: dict) -> Summary:
     bullets = [
         SummaryPoint(
             n=b.get("n", i + 1),
-            category=b.get("category", "STRATEGY"),
             point=b.get("point", ""),
-            evidence=b.get("evidence", ""),
-            segment=b.get("segment", "middle"),
         )
         for i, b in enumerate(payload.get("bullets", []))
     ]
     return Summary(
-        headline=payload.get("headline", ""),
         bullets=bullets,
-        open_questions=payload.get("open_questions", []) or [],
+        guests=list(payload.get("guests", []) or []),
+        guest_role_and_company=payload.get("guest_role_and_company", "") or "",
         transcript_completeness=payload.get("transcript_completeness", "complete"),
     )
 

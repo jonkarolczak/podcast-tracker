@@ -34,7 +34,7 @@ logger = logging.getLogger("tracker")
 from .budget import AnthropicBudget, WallclockExceeded, WallclockGuard, WhisperBudget
 from .config import Settings, Watchlist, load_settings, load_watchlist
 from .delivery import DigestSendError, send_digest
-from .discovery import discover_all, search_byperson
+from .discovery import discover_all, search_byperson, search_itunes
 from .filters import assign_priority_scores, classify
 from .models import DigestEntry, Episode, EpisodeCandidate
 from .render_email import render
@@ -44,6 +44,7 @@ from .state import (
     load_seen_guids,
     mark_ran_today,
 )
+from .spotify import enrich_with_spotify_urls
 from .summarize import summarize
 from .transcript import fetch_transcript
 
@@ -146,6 +147,7 @@ async def run_daily(
             episodes = classify(candidates)
             tier_weights = watchlist.match_priority.tier_weights.model_dump()
             assign_priority_scores(episodes, tier_weights)
+            await enrich_with_spotify_urls(episodes)
             entries = await _run_pipeline(episodes, settings, wallclock_guard=wallclock_guard)
 
         run_date = datetime.now(timezone.utc).date()
@@ -183,18 +185,25 @@ async def run_daily(
         return 3
 
 
-async def run_once_search(query: str, *, settings: Settings, limit: int = 1) -> int:
-    """Discovery-only smoke test: byperson query → first candidate → full pipeline → email."""
+async def run_once_search(
+    query: str,
+    *,
+    settings: Settings,
+    limit: int = 1,
+    lookback_hours: int | None = None,
+) -> int:
+    """Discovery-only smoke test: iTunes search → first candidate → full pipeline → email."""
     wallclock_guard = WallclockGuard(settings.budgets.total_wallclock_minutes)
+    lookback = lookback_hours or settings.schedule.lookback_hours
     async with httpx.AsyncClient() as client:
-        candidates = await search_byperson(
+        candidates = await search_itunes(
             client, query,
             match_type="named_person",
-            lookback_hours=settings.schedule.lookback_hours,
-            max_results=20,
+            lookback_hours=lookback,
+            max_results=25,
         )
     if not candidates:
-        logger.info("no PodcastIndex hits for %r in the last %dh", query, settings.schedule.lookback_hours)
+        logger.info("no iTunes hits for %r in the last %dh", query, lookback)
         return 0
     candidates = candidates[:limit]
     logger.info("found %d candidate(s) for %r", len(candidates), query)
@@ -204,6 +213,7 @@ async def run_once_search(query: str, *, settings: Settings, limit: int = 1) -> 
     if not episodes:
         logger.info("filter pass dropped all candidates")
         return 0
+    await enrich_with_spotify_urls(episodes)
     entries = await _run_pipeline(episodes, settings, wallclock_guard=wallclock_guard)
     run_date = datetime.now(timezone.utc).date()
     rendered = render(entries, run_date)
@@ -226,6 +236,8 @@ def main() -> int:
     once_search = sub.add_parser("once-search", help="smoke test: search one query, run full pipeline")
     once_search.add_argument("query", type=str)
     once_search.add_argument("--limit", type=int, default=1)
+    once_search.add_argument("--lookback-hours", type=int, default=None,
+                             help="override settings.schedule.lookback_hours")
 
     args = parser.parse_args()
 
@@ -235,7 +247,12 @@ def main() -> int:
         watchlist = load_watchlist()
         return asyncio.run(run_daily(watchlist=watchlist, settings=settings, dry_run=args.dry_run))
     if args.mode == "once-search":
-        return asyncio.run(run_once_search(args.query, settings=settings, limit=args.limit))
+        return asyncio.run(run_once_search(
+            args.query,
+            settings=settings,
+            limit=args.limit,
+            lookback_hours=args.lookback_hours,
+        ))
     parser.print_help()
     return 1
 
