@@ -3,8 +3,6 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import date
-
 import resend
 from resend.exceptions import ResendError
 
@@ -17,8 +15,16 @@ class DigestSendError(RuntimeError):
     pass
 
 
-def send_digest(rendered: RenderedDigest, *, run_date: date) -> str:
-    """Send the digest via Resend. Returns the Resend message ID on success."""
+def send_digest(
+    rendered: RenderedDigest,
+    *,
+    idempotency_key: str | None = None,
+) -> str:
+    """Send the digest via Resend. Returns the Resend message ID on success.
+
+    Caller passes a stable idempotency_key for the production daily run
+    (e.g., "digest-2026-05-24"). Smoke tests pass None to allow re-runs.
+    """
     api_key = os.environ.get("RESEND_API_KEY")
     if not api_key:
         raise DigestSendError("RESEND_API_KEY not set")
@@ -38,19 +44,17 @@ def send_digest(rendered: RenderedDigest, *, run_date: date) -> str:
         "text": rendered.text,
         "tags": [{"name": "kind", "value": "digest"}],
     }
-    options: resend.Emails.SendOptions = {
-        "idempotency_key": f"digest-{run_date.isoformat()}",
-    }
+    options: resend.Emails.SendOptions = {}
+    if idempotency_key:
+        options["idempotency_key"] = idempotency_key
     try:
-        response = resend.Emails.send(params, options)
+        response = resend.Emails.send(params, options) if options else resend.Emails.send(params)
     except ResendError as e:
         logger.error(
-            "resend send failed",
-            extra={
-                "code": getattr(e, "code", None),
-                "error_type": getattr(e, "error_type", None),
-                "message": getattr(e, "message", str(e)),
-            },
+            "resend send failed: code=%s type=%s detail=%s",
+            getattr(e, "code", None),
+            getattr(e, "error_type", None),
+            getattr(e, "message", str(e)),
         )
         raise DigestSendError(str(e)) from e
     message_id = response.get("id") if isinstance(response, dict) else getattr(response, "id", None)

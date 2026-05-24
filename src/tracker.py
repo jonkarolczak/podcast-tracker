@@ -166,7 +166,7 @@ async def run_daily(
             return 0
 
         try:
-            send_digest(rendered, run_date=run_date)
+            send_digest(rendered, idempotency_key=f"digest-{run_date.isoformat()}")
         except DigestSendError:
             logger.exception("digest send failed; state NOT committed")
             return 2
@@ -218,7 +218,8 @@ async def run_once_search(
     run_date = datetime.now(timezone.utc).date()
     rendered = render(entries, run_date)
     try:
-        send_digest(rendered, run_date=run_date)
+        # No idempotency key for one-off smoke tests so they're re-runnable.
+        send_digest(rendered, idempotency_key=None)
     except DigestSendError:
         logger.exception("digest send failed")
         return 2

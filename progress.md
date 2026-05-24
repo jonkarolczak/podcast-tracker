@@ -18,4 +18,14 @@
   - **Pydantic + slim settings.yaml** kept (6 knobs in YAML, rest hardcoded)
   - **Warn-then-stop cost guard** ($5 warn / $10 hard-stop per run)
 - Batch API and Phase 4 framing remain deferred.
-- Plan is now implementation-ready. Next: `/ce:work` to begin Phase 1 (end-to-end vertical slice + security baseline + smoke test email).
+
+## 2026-05-24
+
+- Phase 1 foundation implemented and shipped on `feat/phase-1-foundation` branch.
+- 47 unit tests pass; end-to-end smoke test passes (real digest email lands in Gmail).
+- Pipeline runs in ~3 minutes wallclock: iTunes discovery → filter fast-path → Spotify enrichment → Whisper transcription (~20x realtime) → Sonnet summarization → Resend send.
+- Discovery surface swapped: iTunes Search replaces PodcastIndex byperson (the latter only matches feeds with `<podcast:person>` tags, which is too sparse).
+- Digest format finalized per Jon's spec: "Podcast Tracker (Month Day, Year) (N Episode[s])" heading, "## N. Podcast: Guests" per-episode header, Guests (plural list) / Company-role / Date / Link fields, "Summary" heading with concise bullets and no category labels.
+- Spotify Web API integration added (`src/spotify.py`) with client-credentials flow and per-process token caching. Episode URLs in the digest now link directly to Spotify.
+- Bug fixes during iteration: `extra={"message": ...}` collides with LogRecord's reserved field name (logging crash); Resend idempotency key needs to be caller-controlled so smoke tests are re-runnable without 24h waits.
+- Phase 1 complete. Next: push branch, open PR, then Phase 2 (full watchlist async discovery + site-specific scrapers + GitHub Actions workflow).
