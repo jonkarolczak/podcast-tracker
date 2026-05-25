@@ -29,3 +29,20 @@
 - Spotify Web API integration added (`src/spotify.py`) with client-credentials flow and per-process token caching. Episode URLs in the digest now link directly to Spotify.
 - Bug fixes during iteration: `extra={"message": ...}` collides with LogRecord's reserved field name (logging crash); Resend idempotency key needs to be caller-controlled so smoke tests are re-runnable without 24h waits.
 - Phase 1 complete. Next: push branch, open PR, then Phase 2 (full watchlist async discovery + site-specific scrapers + GitHub Actions workflow).
+
+## 2026-05-25
+
+- PR #1 (Phase 1) squash-merged to main.
+- Phase 3 work shipped on `feat/phase-3-production` → PR #2 open.
+  - GitHub Actions cron workflow (dual UTC entries, ffmpeg install, Whisper model cache, secret env vars, git-auto-commit state push).
+  - CI test workflow (pytest on push/PR).
+  - Dependabot config (weekly pip + github-actions updates).
+  - iTunes-backed daily discovery (fixing the PR #1 gap where `--daily` was still using PodcastIndex byperson).
+  - iTunes concurrency → 3 with retry-on-403/429/5xx (Apple rate-limits at higher concurrency).
+  - RSS feed fetch via httpx + certifi (fixes macOS dev-env SSL).
+  - Filter pass batches 40 candidates/call (avoids overflowing Haiku on heavy days).
+  - DiscoveryTotalFailure exception → distinct "discovery failed today" email; mark_ran_today NOT called so the next run retries.
+- Local discovery dry-run on the full watchlist (7-day lookback) returned 198 candidates cleanly with zero 403s.
+- Docs: `docs/resend-domain-setup.md` with step-by-step for verifying `send.jonkarolczak.com` (do before flipping cron on).
+- 58 tests pass (was 47).
+- Next: Jon to (a) verify Resend domain, (b) merge PR #2, (c) trigger first workflow_dispatch run to validate the daily path in production environment.

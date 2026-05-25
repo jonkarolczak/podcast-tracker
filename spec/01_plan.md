@@ -1268,9 +1268,10 @@ Four taste decisions resolved during deepening:
 3. **Pydantic + slim settings.yaml: both kept.** 6 knobs in YAML; everything else hardcoded.
 4. **Cost guard: warn-then-stop ($5 warn / $10 hard-stop per run).**
 
-Two items still deferred for later decision:
+Items still deferred for later decision:
 
 - **Anthropic Batch API**: revisit in Phase 4 only if monthly Anthropic spend exceeds $25.
+- **OpenRouter / non-Anthropic models**: Phase 4 A/B experiment. Run Sonnet 4.6 (current) and Gemini 2.5 Pro via OpenRouter on the same 5 episodes for a week, compare summary quality (specificity, faithfulness, coverage), pick the winner. Realistic savings: ~60% cost reduction (~$0.07/podcast vs ~$0.17) if Gemini 2.5 Pro holds up. Requires summarize.py + filters.py rewrite to a provider-agnostic abstraction + new tests + losing Anthropic prompt caching (~$0.60/mo).
 - **Phase 4 framing**: currently described as an ongoing tuning loop rather than a discrete phase.
 
 ## Sources & References

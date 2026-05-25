@@ -110,6 +110,37 @@ def _count_line(n_entries: int) -> str:
     return f"{n_entries} {label}"
 
 
+def render_failure(run_date: date, reason: str) -> RenderedDigest:
+    """Render a 'discovery failed today' notification email.
+
+    Used when ALL discovery surfaces fail so the user notices instead of getting
+    a silent zero-match digest that hides the outage.
+    """
+    heading = f"Podcast Tracker ({_format_date(run_date)})"
+    subheading = "Discovery failed"
+    body_text = (
+        f"{heading}\n"
+        f"{subheading}\n\n"
+        f"All discovery surfaces failed during today's run. The pipeline did not "
+        f"process any episodes.\n\n"
+        f"Reason: {reason}\n\n"
+        f"State was not committed. The next scheduled run will retry; if the issue "
+        f"persists, check the GitHub Actions logs.\n"
+    )
+    body_html = _env.get_template("digest.html.j2").render(
+        contexts=[],
+        heading=heading,
+        subheading=subheading,
+        failure_reason=reason,
+    )
+    body_html = _inliner.inline(body_html)
+    return RenderedDigest(
+        subject=f"Podcast Tracker ({_format_date(run_date)}) — discovery failed",
+        html=body_html,
+        text=body_text,
+    )
+
+
 def render(entries: list[DigestEntry], run_date: date) -> RenderedDigest:
     """Render the digest. Sorts entries by priority_score descending."""
     sorted_entries = sorted(
