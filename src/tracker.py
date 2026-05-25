@@ -36,7 +36,7 @@ from .config import Settings, Watchlist, load_settings, load_watchlist
 from .delivery import DigestSendError, send_digest
 from .discovery import discover_all, search_byperson, search_itunes
 from .filters import assign_priority_scores, classify
-from .models import DigestEntry, Episode, EpisodeCandidate
+from .models import DigestEntry, Episode
 from .render_email import render
 from .state import (
     add_seen_episodes,
@@ -45,6 +45,7 @@ from .state import (
     mark_ran_today,
 )
 from .spotify import enrich_with_spotify_urls
+from .models import EpisodeCandidate, Summary, SummaryPoint, Transcript
 from .summarize import summarize
 from .transcript import fetch_transcript
 
@@ -226,6 +227,102 @@ async def run_once_search(
     return 0
 
 
+def _build_preview_entries() -> list[DigestEntry]:
+    """Two fake DigestEntries for fast template iteration. No API calls."""
+    base_dt = datetime(2026, 5, 22, tzinfo=timezone.utc)
+
+    cand1 = EpisodeCandidate(
+        guid="preview-1",
+        title="Sam Altman on the GPT-6 launch and OpenAI's path to AGI",
+        description="",
+        podcast="Dwarkesh Podcast",
+        podcast_feed_id=None,
+        published_at=base_dt,
+        duration_minutes=125.0,
+        episode_url="https://www.dwarkesh.com/p/sam-altman",
+        audio_url=None,
+        youtube_url=None,
+        podcast_transcript_url=None,
+        podcast_transcript_type=None,
+        match_type="specific_podcast",
+        match_query="Dwarkesh Podcast",
+        discovered_via="rss",
+        spotify_url="https://open.spotify.com/episode/abc123sample",
+    )
+    summary1 = Summary(
+        bullets=[
+            SummaryPoint(n=1, point="Altman targeted a Q3 2026 release for GPT-6, citing internal benchmarks that show ~3x improvement over GPT-5 on reasoning tasks."),
+            SummaryPoint(n=2, point="OpenAI grew from 1,200 to 2,100 employees in 2025 with most of the hiring concentrated in research and inference engineering."),
+            SummaryPoint(n=3, point="\"We're not running out of training data — we're running out of the right kind of training data,\" Altman said when pressed on scaling limits."),
+            SummaryPoint(n=4, point="OpenAI signed a $50B compute commitment with CoreWeave running through 2030, framed as a hedge against Microsoft Azure capacity."),
+            SummaryPoint(n=5, point="The hosts speculated that the recent leadership departures point to a structural rift over AGI safety timelines, but Altman declined to confirm."),
+        ],
+        guests=["Sam Altman"],
+        guest_role_and_company="CEO of OpenAI",
+    )
+    ep1 = Episode(candidate=cand1, filter_confidence=1.0, priority_score=105.0)
+    entry1 = DigestEntry(
+        episode=ep1,
+        transcript=Transcript(text="x", source="podcast_namespace"),
+        summary=summary1,
+    )
+
+    cand2 = EpisodeCandidate(
+        guid="preview-2",
+        title="Brad Gerstner on AI infrastructure capex and the 2026 funding cycle",
+        description="",
+        podcast="Invest Like the Best",
+        podcast_feed_id=None,
+        published_at=datetime(2026, 5, 20, tzinfo=timezone.utc),
+        duration_minutes=78.0,
+        episode_url="https://joincolossus.com/episodes/brad-gerstner-2026",
+        audio_url=None,
+        youtube_url=None,
+        podcast_transcript_url=None,
+        podcast_transcript_type=None,
+        match_type="named_person",
+        match_query="Brad Gerstner",
+        discovered_via="itunes_search",
+        spotify_url="https://open.spotify.com/episode/def456sample",
+    )
+    summary2 = Summary(
+        bullets=[
+            SummaryPoint(n=1, point="Gerstner pegged 2026 hyperscaler capex at $510B, up from $385B in 2025, with NVIDIA capturing roughly 60% of incremental dollars."),
+            SummaryPoint(n=2, point="Altimeter exited 80% of its Snowflake position in Q1 2026 and reallocated to Anthropic, citing better unit economics in pure model labs."),
+            SummaryPoint(n=3, point="\"The picks-and-shovels trade is over. The next leg is application-layer companies with proprietary distribution,\" Gerstner argued."),
+            SummaryPoint(n=4, point="Coreweave's stock-based comp is running at 18% of revenue — Gerstner flagged this as the structural risk that gets the most pushback from LPs."),
+        ],
+        guests=["Brad Gerstner"],
+        guest_role_and_company="Founder & CEO of Altimeter Capital",
+    )
+    ep2 = Episode(candidate=cand2, filter_confidence=0.95, priority_score=58.0)
+    entry2 = DigestEntry(
+        episode=ep2,
+        transcript=Transcript(text="x", source="youtube_captions"),
+        summary=summary2,
+    )
+
+    return [entry1, entry2]
+
+
+def run_preview(*, dry_run: bool = False) -> int:
+    """Render two fake entries and (optionally) send them. No API calls except Resend."""
+    entries = _build_preview_entries()
+    run_date = datetime.now(timezone.utc).date()
+    rendered = render(entries, run_date)
+    if dry_run:
+        print(rendered.subject)
+        print()
+        print(rendered.text)
+        return 0
+    try:
+        send_digest(rendered, idempotency_key=None)
+    except DigestSendError:
+        logger.exception("preview send failed")
+        return 2
+    return 0
+
+
 def main() -> int:
     load_dotenv()
     parser = argparse.ArgumentParser(prog="src.tracker")
@@ -239,6 +336,9 @@ def main() -> int:
     once_search.add_argument("--limit", type=int, default=1)
     once_search.add_argument("--lookback-hours", type=int, default=None,
                              help="override settings.schedule.lookback_hours")
+
+    preview = sub.add_parser("preview", help="render and send a 2-episode preview digest with fake data")
+    preview.add_argument("--dry-run", action="store_true", help="print to stdout instead of sending")
 
     args = parser.parse_args()
 
@@ -254,6 +354,8 @@ def main() -> int:
             limit=args.limit,
             lookback_hours=args.lookback_hours,
         ))
+    if args.mode == "preview":
+        return run_preview(dry_run=args.dry_run)
     parser.print_help()
     return 1
 

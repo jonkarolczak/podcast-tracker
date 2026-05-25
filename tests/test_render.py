@@ -61,27 +61,37 @@ def _entry_with_summary(
     )
 
 
-def test_subject_format_with_one_episode():
+def test_subject_format():
     rendered = render([_entry_with_summary()], date(2026, 5, 24))
-    assert rendered.subject == "Podcast Tracker (May 24, 2026) (1 Episode)"
+    assert rendered.subject == "Podcast Tracker (May 24, 2026)"
 
 
-def test_subject_format_with_multiple_episodes():
-    entries = [_entry_with_summary(), _entry_with_summary()]
-    rendered = render(entries, date(2026, 5, 24))
-    assert rendered.subject == "Podcast Tracker (May 24, 2026) (2 Episodes)"
+def test_subject_format_constant_regardless_of_count():
+    """Subject is the same whether 0, 1, or N episodes — count moves to subheading."""
+    one = render([_entry_with_summary()], date(2026, 5, 24)).subject
+    two = render([_entry_with_summary(), _entry_with_summary()], date(2026, 5, 24)).subject
+    zero = render([], date(2026, 5, 24)).subject
+    assert one == two == zero == "Podcast Tracker (May 24, 2026)"
 
 
-def test_subject_format_with_zero_episodes():
-    rendered = render([], date(2026, 5, 24))
-    assert rendered.subject == "Podcast Tracker (May 24, 2026) (0 Episodes)"
-
-
-def test_heading_matches_subject():
+def test_heading_in_body_matches_subject():
     rendered = render([_entry_with_summary()], date(2026, 5, 24))
-    # The heading should appear in both HTML and plain text
-    assert "Podcast Tracker (May 24, 2026) (1 Episode)" in rendered.html
-    assert "Podcast Tracker (May 24, 2026) (1 Episode)" in rendered.text
+    assert "Podcast Tracker (May 24, 2026)" in rendered.html
+    assert "Podcast Tracker (May 24, 2026)" in rendered.text
+    # No "(N Episodes)" appended to heading
+    assert "Podcast Tracker (May 24, 2026) (" not in rendered.html
+    assert "Podcast Tracker (May 24, 2026) (" not in rendered.text
+
+
+def test_subheading_shows_count():
+    one = render([_entry_with_summary()], date(2026, 5, 24))
+    assert "1 Episode" in one.text and "1 Episode" in one.html
+
+    two = render([_entry_with_summary(), _entry_with_summary()], date(2026, 5, 24))
+    assert "2 Episodes" in two.text and "2 Episodes" in two.html
+
+    zero = render([], date(2026, 5, 24))
+    assert "0 Episodes" in zero.text and "0 Episodes" in zero.html
 
 
 def test_per_episode_header_with_guest_uses_colon():

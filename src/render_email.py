@@ -101,9 +101,13 @@ def _build_entry_context(entry: DigestEntry, n: int) -> EntryContext:
     )
 
 
-def _subject(run_date: date, n_entries: int) -> str:
+def _subject(run_date: date) -> str:
+    return f"Podcast Tracker ({_format_date(run_date)})"
+
+
+def _count_line(n_entries: int) -> str:
     label = "Episode" if n_entries == 1 else "Episodes"
-    return f"Podcast Tracker ({_format_date(run_date)}) ({n_entries} {label})"
+    return f"{n_entries} {label}"
 
 
 def render(entries: list[DigestEntry], run_date: date) -> RenderedDigest:
@@ -117,17 +121,18 @@ def render(entries: list[DigestEntry], run_date: date) -> RenderedDigest:
         _build_entry_context(entry, n=i + 1)
         for i, entry in enumerate(sorted_entries)
     ]
-    heading = f"Podcast Tracker ({_format_date(run_date)}) ({len(contexts)} {'Episode' if len(contexts) == 1 else 'Episodes'})"
+    heading = f"Podcast Tracker ({_format_date(run_date)})"
+    subheading = _count_line(len(contexts))
 
     html_raw = _env.get_template("digest.html.j2").render(
-        contexts=contexts, heading=heading,
+        contexts=contexts, heading=heading, subheading=subheading,
     )
     html = _inliner.inline(html_raw)
     text = _env.get_template("digest.txt.j2").render(
-        contexts=contexts, heading=heading,
+        contexts=contexts, heading=heading, subheading=subheading,
     )
     return RenderedDigest(
-        subject=_subject(run_date, len(contexts)),
+        subject=_subject(run_date),
         html=html,
         text=text,
     )

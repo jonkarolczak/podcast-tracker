@@ -1,7 +1,8 @@
 {{ heading }}
+{{ subheading }}
 
 {% for ctx in contexts %}
-═══════════════════════════════════════════════════════════════════
+
 ## {{ ctx.n }}. {{ ctx.podcast }}{% if ctx.has_guest %}: {{ ctx.header_guest }}{% endif %}
 
 Podcast: {{ ctx.podcast }}
