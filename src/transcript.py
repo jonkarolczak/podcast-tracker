@@ -38,26 +38,18 @@ logger = logging.getLogger(__name__)
 
 # --- Security: URL validation -----------------------------------------------
 
-# Hosts where audio/captions legitimately live. Add new ones as we discover them.
-_AUDIO_HOST_ALLOWLIST = {
-    "youtube.com",
-    "www.youtube.com",
-    "m.youtube.com",
-    "youtu.be",
-}
-_PODCAST_HOST_SUBSTRINGS = (
-    ".megaphone.fm",
-    ".buzzsprout.com",
-    ".libsyn.com",
-    ".acast.com",
-    ".simplecast.com",
-    ".podbean.com",
-    ".transistor.fm",
-    ".captivate.fm",
-    ".substack.com",
-    ".workers.dev",  # Dwarkesh feed proxy
-    ".rss.com",
-)
+# We previously maintained a host allowlist, but podcast audio lives on dozens
+# of CDNs and tracker domains (Buzzsprout's pscrb.fm, Megaphone's mgln.ai,
+# Podroll's pdrl.fm, Spreaker, Ausha, Podtrac, etc.) and the allowlist became
+# a maintenance burden that blocked legitimate downloads.
+#
+# Security model is now:
+#   1. https only (no http/file/data/ftp)
+#   2. Resolved IP must NOT be in private/metadata ranges (SSRF protection)
+#   3. yt-dlp --max-filesize 500M caps disk DoS
+#   4. The source URLs come from RSS/iTunes/PodcastIndex results, which
+#      themselves are public podcast metadata services
+# These three together cover the realistic threat surface for this use case.
 
 _BLOCKED_NETS = [
     ipaddress.ip_network("127.0.0.0/8"),
@@ -65,6 +57,8 @@ _BLOCKED_NETS = [
     ipaddress.ip_network("172.16.0.0/12"),
     ipaddress.ip_network("192.168.0.0/16"),
     ipaddress.ip_network("169.254.0.0/16"),  # cloud metadata
+    ipaddress.ip_network("0.0.0.0/8"),
+    ipaddress.ip_network("100.64.0.0/10"),  # CGNAT
     ipaddress.ip_network("::1/128"),
     ipaddress.ip_network("fc00::/7"),
     ipaddress.ip_network("fe80::/10"),
@@ -75,21 +69,17 @@ class UnsafeUrlError(ValueError):
     pass
 
 
-def _is_known_podcast_host(host: str) -> bool:
-    host = host.lower()
-    return any(sub in host for sub in _PODCAST_HOST_SUBSTRINGS)
-
-
 def validate_url(url: str) -> None:
-    """Reject non-https, non-allowlisted hosts, or hosts resolving to private/metadata IPs."""
+    """Reject non-https URLs and URLs resolving to private/metadata IPs (SSRF guard).
+
+    No host allowlist — podcast audio CDNs are too varied to enumerate.
+    """
     parsed = urlparse(url)
     if parsed.scheme != "https":
         raise UnsafeUrlError(f"non-https scheme: {parsed.scheme}")
     host = (parsed.hostname or "").lower()
     if not host:
         raise UnsafeUrlError("missing host")
-    if host not in _AUDIO_HOST_ALLOWLIST and not _is_known_podcast_host(host):
-        raise UnsafeUrlError(f"host not in allowlist: {host}")
     try:
         infos = socket.getaddrinfo(host, None)
     except socket.gaierror as e:
@@ -223,12 +213,23 @@ def _download_audio(audio_url: str, workdir: Path, *, timeout: int = 300) -> Pat
         if not mp3s:
             raise RuntimeError("yt-dlp succeeded but produced no mp3")
         return mp3s[0]
-    # Direct RSS enclosure URL — stream with byte cap
+    # Direct RSS enclosure URL — stream with byte cap.
+    # Some hosts (Substack) 403 bot-like User-Agents; use a Chrome-flavored
+    # UA so audio fetches succeed.
     ext = Path(urlparse(audio_url).path).suffix or ".mp3"
     out_path = workdir / f"episode{ext}"
     max_bytes = 500 * 1024 * 1024  # 500 MB cap
     bytes_written = 0
-    with httpx.Client(timeout=timeout, follow_redirects=True) as client:
+    browser_ua = (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/130.0.0.0 Safari/537.36"
+    )
+    with httpx.Client(
+        timeout=timeout,
+        follow_redirects=True,
+        headers={"User-Agent": browser_ua},
+    ) as client:
         with client.stream("GET", audio_url) as r:
             r.raise_for_status()
             with open(out_path, "wb") as f:

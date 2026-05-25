@@ -74,7 +74,14 @@ def _xml_escape(s: str) -> str:
 
 
 def _title_contains_query(candidate: EpisodeCandidate) -> bool:
-    """Title-literal match: query appears in the title, case-insensitively, as a substring."""
+    """Title-literal match: query appears in the title, case-insensitively.
+
+    Restricted to named_person matches. Company names appear casually in titles
+    ("OpenAI's CEO does X", "Sequoia bets on Y") without being the focus of the
+    episode, so company-name candidates always go through the Haiku filter.
+    """
+    if candidate.match_type != "named_person":
+        return False
     if not candidate.match_query:
         return False
     return candidate.match_query.lower() in (candidate.title or "").lower()

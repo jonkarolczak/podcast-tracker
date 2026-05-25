@@ -13,26 +13,37 @@ def test_https_required():
         validate_url("data:text/html,<script>")
 
 
-def test_host_not_in_allowlist():
+def test_arbitrary_https_host_accepted_when_public_ip():
+    """No host allowlist anymore — any https URL resolving to a public IP passes.
+
+    Validates DNS to a real host. Skipped silently if offline.
+    """
+    try:
+        validate_url("https://www.youtube.com/watch?v=abc")
+    except UnsafeUrlError as e:
+        # Only acceptable failure here is DNS / network — not scheme/host
+        assert "scheme" not in str(e)
+
+
+def test_blocked_when_resolves_to_loopback(monkeypatch):
+    """A malicious DNS answer pointing to 127.0.0.1 is the actual SSRF threat."""
+    import socket
+
+    def fake_getaddrinfo(host, *args, **kwargs):
+        return [(socket.AF_INET, socket.SOCK_STREAM, 0, "", ("127.0.0.1", 0))]
+
+    monkeypatch.setattr(socket, "getaddrinfo", fake_getaddrinfo)
     with pytest.raises(UnsafeUrlError):
         validate_url("https://evil.example.com/x.mp3")
 
 
-def test_youtube_allowed():
-    # Will reach DNS lookup, which should succeed and resolve to a public IP.
-    # If offline this fails for a different reason — keep loose assertion.
-    try:
-        validate_url("https://www.youtube.com/watch?v=abc")
-    except UnsafeUrlError as e:
-        # Only acceptable failure here is DNS / network — not allowlist
-        assert "allowlist" not in str(e) and "scheme" not in str(e)
+def test_blocked_when_resolves_to_cloud_metadata(monkeypatch):
+    """169.254.169.254 (AWS/GCP metadata) must be blocked."""
+    import socket
 
+    def fake_getaddrinfo(host, *args, **kwargs):
+        return [(socket.AF_INET, socket.SOCK_STREAM, 0, "", ("169.254.169.254", 0))]
 
-def test_known_podcast_substring_allowed_in_host_check():
-    # We can't always reach DNS for arbitrary podcast hosts in unit tests; just confirm
-    # the host substring check accepts known patterns before DNS resolution.
-    from src.transcript import _is_known_podcast_host
-    assert _is_known_podcast_host("feeds.megaphone.fm")
-    assert _is_known_podcast_host("rss.buzzsprout.com")
-    assert _is_known_podcast_host("apple.dwarkesh-podcast.workers.dev")
-    assert not _is_known_podcast_host("malicious.example.com")
+    monkeypatch.setattr(socket, "getaddrinfo", fake_getaddrinfo)
+    with pytest.raises(UnsafeUrlError):
+        validate_url("https://evil.example.com/x.mp3")
