@@ -1,1 +1,434 @@
-[]
+[
+  {
+    "guid": "substack:post:198847047",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Reiner Pope – Chip design from the bottom up",
+    "podcast": "Dwarkesh Podcast"
+  },
+  {
+    "guid": "3bc7d580-53ec-11f1-99c0-3bd245449e4f",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Gavin Baker - Watts and Wafers - [Invest Like the Best, EP.473]",
+    "podcast": "Invest Like the Best"
+  },
+  {
+    "guid": "Buzzsprout-19207390",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Ep 781: OpenAI’s Codex For Beginners Pt 2: Advanced Agentic Strategies broken down for Newbies",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "Buzzsprout-19222339",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Ep 783: Google’s Gemini 3.5, Codex goes for Goals, Alexa going after NotebookLM and 7 More AI Updates You Should be Using Today",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "Buzzsprout-19200810",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Ep 780: Build, Buy, Partner, or Wait: The 4-Layer AI Stack Decision Framework for 2026 (Start Here Series, Vol 25)",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "Buzzsprout-19214633",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Ep 782: How Smart Teams Stopped Prompting AI and Started Automating Workflows",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "itunes:1000768596077",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "#2501 - Marc Andreessen",
+    "podcast": "The Joe Rogan Experience"
+  },
+  {
+    "guid": "itunes:1000768719772",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Marc Andreessen on AI, California, and the Future of America | Joe Rogan",
+    "podcast": "The a16z Show"
+  },
+  {
+    "guid": "itunes:1000768964192",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "I Called Out a16z Partner (Martin Casado) for Downplaying AI Capabilities in 2024",
+    "podcast": "Doom Debates!"
+  },
+  {
+    "guid": "itunes:1000768700545",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Arthur Mensch explique les tokens aux députés pendant que la France s'effondre !",
+    "podcast": "Silicon Carne, un peu de picante dans un monde de Tech !"
+  },
+  {
+    "guid": "itunes:1000768706800",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Gavin Baker - Watts and Wafers",
+    "podcast": "Invest Like the Best with Patrick O'Shaughnessy"
+  },
+  {
+    "guid": "itunes:1000768706874",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Gavin Baker - Watts and Wafers",
+    "podcast": "Invest Like the Best with Patrick O'Shaughnessy"
+  },
+  {
+    "guid": "itunes:1000768571117",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Ben Thompson",
+    "podcast": "Not Dead Yet"
+  },
+  {
+    "guid": "itunes:1000768507257",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "441 The Escapes of David George",
+    "podcast": "Ben Franklin's World"
+  },
+  {
+    "guid": "itunes:1000768450651",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Sir Demis Hassabis and Sebastian Mallaby",
+    "podcast": "City Arts & Lectures"
+  },
+  {
+    "guid": "itunes:1000768533274",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "The Co-Founders of Claude AI Tell Oprah About the Impact Artificial Intelligence Has on Your Life",
+    "podcast": "The Oprah Podcast"
+  },
+  {
+    "guid": "itunes:1000768557220",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Arthur Mensch a-t-il raison ? – RDV Tech",
+    "podcast": "Le rendez-vous Tech - RDV Tech"
+  },
+  {
+    "guid": "itunes:1000769455062",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "#128 - Arthur Mensch à l'Assemblée, Gemini Omni et Karpathy chez Anthropic",
+    "podcast": "TsunamIA: surfez sur la vague du changement apporté par l'intelligence artificielle"
+  },
+  {
+    "guid": "itunes:1000768730527",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "BREAKING: Elon Musk's First Interview Since Jury Rejected Claim Against Altman's OpenAI!!!",
+    "podcast": "Elon Musk Thinking"
+  },
+  {
+    "guid": "itunes:1000769001531",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Elon Musk's SpaceX Moves and AI Politics",
+    "podcast": "The Elon Musk Update"
+  },
+  {
+    "guid": "itunes:1000769419965",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Keach Hagey recounts the January 2016 founding of OpenAI in San Francisco, initially established as a modest nonprofit research lab in Greg Brockman's apartment. Co-founded by Sam Altman, Brockman, an",
+    "podcast": "The John Batchelor Show"
+  },
+  {
+    "guid": "itunes:1000769426518",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "L'Actu Tech (en 3 minutes) - Ce qu'a dit Arthur Mensch (Mistral AI) à l'assemblée nationale",
+    "podcast": "Playlist News : les meilleurs podcasts d'actualité"
+  },
+  {
+    "guid": "itunes:1000769425300",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "L'Actu Tech (en 3 minutes) - Ce qu'a dit Arthur Mensch (Mistral AI) à l'assemblée nationale",
+    "podcast": "Moins de 30 minutes : les meilleurs podcasts courts"
+  },
+  {
+    "guid": "itunes:1000768403785",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Face à l'IA : Arthur Mensch a l’assemblée nationale française : sauveteur de la tech européenne ou super vendeur de Mistral AI? | lundi 18/05/26",
+    "podcast": "Trends-Tendances"
+  },
+  {
+    "guid": "itunes:1000768520952",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Biography Flash Jensen Huang The Godfather of AI Shaping the Future One Chip at a Time",
+    "podcast": "Jensen Huang  - Biography Flash"
+  },
+  {
+    "guid": "itunes:1000768852941",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "You Might Also Like: The Oprah Podcast",
+    "podcast": "THIS IS HISTORY — A DYNASTY TO DIE FOR"
+  },
+  {
+    "guid": "itunes:1000768757146",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "You Might Also Like: The Oprah Podcast",
+    "podcast": "Togethermess"
+  },
+  {
+    "guid": "itunes:1000768902305",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "You Might Also Like: The Oprah Podcast",
+    "podcast": "Weekly Dose of BS"
+  },
+  {
+    "guid": "itunes:1000769484988",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Episode 14 - Can We Talk About the Fireworks?!?",
+    "podcast": "Thoughts Adrift"
+  },
+  {
+    "guid": "itunes:1000768877225",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "20VC: Andrej Karpathy Joins Anthropic & Anthropic Raises $30BN at $900BN Price | SpaceX Files S1: How Does it Trade | Cerebras Smashes Day 1: What it Means for IPOs | Why Mass Layoffs Are More Worryin",
+    "podcast": "The Twenty Minute VC (20VC): Venture Capital | Startup Funding | The Pitch"
+  },
+  {
+    "guid": "itunes:1000769387703",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Fireworks?",
+    "podcast": "What The Frock?"
+  },
+  {
+    "guid": "itunes:1000769387318",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Fireworks?",
+    "podcast": "What The Frock?"
+  },
+  {
+    "guid": "itunes:1000769467203",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Procrastination Sucks: Let's Fix It Together| Clutterbug Podcast #327",
+    "podcast": "Clutterbug - Real-Life Hacks and Tips to Declutter, Organize and Clean your Home Fast"
+  },
+  {
+    "guid": "itunes:1000769022900",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "KEEP CANADA WEIRD - 214 - 2026/05/22 - Ice Cream Arrest, Poetry Phone, 6000 Hammers, and FIREWORKS",
+    "podcast": "The Canadian Gothic"
+  },
+  {
+    "guid": "itunes:1000769484421",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "How to Build a Thriving Small Group + Walking Through Cancer Together (Pt. 1) | Hosanna's Honeys",
+    "podcast": "Miracles & Grace"
+  },
+  {
+    "guid": "itunes:1000769443905",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Dr. Mark McClellan on How FDA and CMS Should Work Together",
+    "podcast": "DC EKG"
+  },
+  {
+    "guid": "itunes:1000768603900",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "What It Really Feels Like to Go Through Doing It Together- with Justin | Ep.192",
+    "podcast": "Doing It Together: Making Sense of Low Libido, Sex, and Intimacy in Marriage."
+  },
+  {
+    "guid": "itunes:1000769454347",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "AED100K Fireworks Fines, Eid Heatwave & The Desi Bling Controversy Trending",
+    "podcast": "The Lovin Dubai Show"
+  },
+  {
+    "guid": "itunes:1000768880215",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Why Cerebras CEO Andrew Feldman Built The World's Largest Computer Chip",
+    "podcast": "Odd Lots"
+  },
+  {
+    "guid": "itunes:1000768790718",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Nvidia Earnings In Focus; SpaceX Eyes Historic IPO",
+    "podcast": "Bloomberg Tech"
+  },
+  {
+    "guid": "itunes:1000768448973",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Nvidia Earnings This Week; Biggest Power Deal in History",
+    "podcast": "Bloomberg Tech"
+  },
+  {
+    "guid": "itunes:1000768515666",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Mistral acquires NXAI spin-off Emmi AI / API Calls",
+    "podcast": "Industrial AI Podcast"
+  },
+  {
+    "guid": "itunes:1000768520489",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Emmi AI aus Linz geht an Mistral AI - die Analyse | Wasner + Steinschaden",
+    "podcast": "Trending Topics Tech Talk"
+  },
+  {
+    "guid": "itunes:1000768767127",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Inside AI Tokenomics: How to Profitably Turn Tokens Into Business Value | NVIDIA AI Podcast Ep. 299",
+    "podcast": "NVIDIA AI Podcast"
+  },
+  {
+    "guid": "itunes:1000768534434",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Rebuilding IT From the Ground Up for the AI Age: Serval's Jake Stauch",
+    "podcast": "Training Data"
+  },
+  {
+    "guid": "itunes:1000768726842",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "OpenAI’s Daybreak and Mistral’s Mythos competitor ",
+    "podcast": "Security Intelligence Podcast"
+  },
+  {
+    "guid": "itunes:1000768999062",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "SpaceX S-1, Anthropic Revenue Booms, OpenAI Cracks Erdős Problem | Diet TBPN",
+    "podcast": "TBPN"
+  },
+  {
+    "guid": "itunes:1000768638368",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Elon Musk verliert gegen OpenAI | OpenAI übernimmt Voice Cloning Startup | Meta AI Incognito Chat | Meta Ray Ban erkennt nun geschriebene Texte in der Luft | Meta überwacht Mitarbeiter/innen",
+    "podcast": "Künstlich Intelligent - KI News Podcast"
+  },
+  {
+    "guid": "itunes:1000769474939",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "S11:E1 Covered or Cooked? Fireworks Insurance Truths",
+    "podcast": "Pyro Talk"
+  },
+  {
+    "guid": "itunes:1000769474511",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "S11:E1 Covered or Cooked? Fireworks Insurance Truths",
+    "podcast": "Pyro Talk"
+  },
+  {
+    "guid": "itunes:1000769455094",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Tea Time with Jaimie & Dianni: Moving In Together, ADHD Messiness & Lesbian Relationship Fears",
+    "podcast": "The Queer Family Podcast – LGBTQ Families & Queer Parenting Stories"
+  },
+  {
+    "guid": "itunes:1000768453243",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Nvidia CEO Jensen Huang & Dell CEO Michael Dell on Agentic AI, Memory Demand and China",
+    "podcast": "Bloomberg Tech"
+  },
+  {
+    "guid": "itunes:1000768751062",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "SQLite, Mistral, OpenAI: How AI Attacks Are Reshaping the Attack Surface",
+    "podcast": "ShadowTalk: Powered by ReliaQuest"
+  },
+  {
+    "guid": "itunes:1000768814761",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "OpenAI and SpaceX are Racing to IPO First",
+    "podcast": "This Week's Tech: AI News, Tech News, OpenAI, ChatGPT, Google Gemini"
+  },
+  {
+    "guid": "itunes:1000768814060",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "OpenAI and SpaceX are Racing to IPO First",
+    "podcast": "Digital Voices: AI News, ChatGPT, OpenAI, Gemini, Claude"
+  },
+  {
+    "guid": "itunes:1000769134518",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Google's Biggest AI Announcements (I Was There)",
+    "podcast": "The Startup Ideas Podcast"
+  },
+  {
+    "guid": "itunes:1000768813230",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "OpenAI and SpaceX are Racing to IPO First",
+    "podcast": "Open AI"
+  },
+  {
+    "guid": "itunes:1000768813657",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "OpenAI and SpaceX are Racing to IPO First",
+    "podcast": "Building AI: News on OpenAI's ChatGPT, Anthropic's Claude, Google Gemini and xAI's Grok"
+  },
+  {
+    "guid": "itunes:1000768813444",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "OpenAI and SpaceX are Racing to IPO First",
+    "podcast": "Machine Learning: News on AI, OpenAI, ChatGPT, Artificial Intelligence, AI Models"
+  },
+  {
+    "guid": "itunes:1000769059497",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Anthropic’s Pentagon Fight Hits Court as Cyber-AI Push Grows",
+    "podcast": "Anthropic Pentagon Watch"
+  },
+  {
+    "guid": "itunes:1000768896458",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Anthropic Isolated as Pentagon AI Deals Widen",
+    "podcast": "Anthropic Pentagon Watch"
+  },
+  {
+    "guid": "itunes:1000768714268",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Fighting shape  🥊  -  Cohere breaks into the biotech biz, Canada’s army is getting a makeover.",
+    "podcast": "The Peak Daily"
+  },
+  {
+    "guid": "itunes:1000768799622",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Stocks Rally into Nvidia Earnings",
+    "podcast": "MRKT Matrix"
+  },
+  {
+    "guid": "itunes:1000768537793",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Pentagon Wants Anthropic Out—Except for Its Cyber AI",
+    "podcast": "Anthropic Pentagon Watch"
+  },
+  {
+    "guid": "itunes:1000769364945",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "\"L'enfant maudit\" Jean Noel Mistral - La chronique d'Arnaud Aymard dans La dernière",
+    "podcast": "La dernière"
+  },
+  {
+    "guid": "itunes:1000769397338",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Wall Street and Google Pool $5B to Rival CoreWeave",
+    "podcast": "Awesome Agents Podcast"
+  },
+  {
+    "guid": "itunes:1000769423704",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Ce qu'a dit Arthur Mensch (Mistral AI) à l'assemblée nationale",
+    "podcast": "L'Actu Tech (en 3 minutes)"
+  },
+  {
+    "guid": "itunes:1000769422404",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "[5/24 21:00] Musk OpenAI lawsuit really about xAI / CoreWeave post-IPO volatility",
+    "podcast": "AI News Flash"
+  },
+  {
+    "guid": "itunes:1000768880546",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Nvidia's AI Infrastructure Play: The Synopsys Deal and Path to 1500 by 2026",
+    "podcast": "Nvidia Stock News Tracker - Daily"
+  },
+  {
+    "guid": "itunes:1000769457118",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Food Scene Fireworks This Week",
+    "podcast": "Texas News Today | 2 Min News | The Daily News Now!"
+  },
+  {
+    "guid": "itunes:1000769375591",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Brat Fest Fireworks: Free Summer Kickoff",
+    "podcast": "Madison News Today | 2 Min News | The Daily News Now!"
+  },
+  {
+    "guid": "itunes:1000769405974",
+    "first_seen": "2026-05-25T09:42:26.837804-05:00",
+    "title": "Makar Returns, Game Three Promises Fireworks",
+    "podcast": "Sports News Today | 2 Min News | The Daily News Now!"
+  }
+]
