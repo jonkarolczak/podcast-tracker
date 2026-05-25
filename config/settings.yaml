@@ -1,0 +1,19 @@
+schedule:
+  target_local_time: "06:00"
+  timezone: America/Chicago
+  lookback_hours: 26
+
+budgets:
+  whisper_wallclock_minutes: 60
+  total_wallclock_minutes: 75
+  anthropic_warn_usd: 5.00
+  anthropic_hard_stop_usd: 10.00
+  assumed_whisper_rtf: 8.0
+
+transcript:
+  whisper_model: base.en
+  whisper_compute_type: int8
+  whisper_threads: 4
+
+email:
+  send_when_empty: true

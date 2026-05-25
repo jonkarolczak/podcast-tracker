@@ -1,0 +1,98 @@
+companies:
+  - name: OpenAI
+  - name: Anthropic
+  - name: Google DeepMind
+    aliases: [DeepMind]
+  - name: xAI
+  - name: Meta AI
+  - name: Mistral AI
+    aliases: [Mistral]
+  - name: Cohere
+  - name: Safe Superintelligence
+    aliases: [SSI]
+  - name: Thinking Machines Lab
+    aliases: [Thinking Machines]
+  - name: NVIDIA
+  - name: CoreWeave
+  - name: Baseten
+  - name: Together AI
+    aliases: [Together]
+  - name: Modal
+  - name: Fireworks AI
+    aliases: [Fireworks]
+  - name: Groq
+  - name: Cerebras
+  - name: Anysphere
+    aliases: [Cursor]
+  - name: Cognition
+  - name: LangChain
+  - name: Glean
+  - name: Sierra
+  - name: Scale AI
+    aliases: [Scale]
+  - name: Coatue
+  - name: Altimeter Capital
+    aliases: [Altimeter]
+  - name: Atreides
+  - name: Andreessen Horowitz
+    aliases: [a16z]
+  - name: Sequoia Capital
+    aliases: [Sequoia]
+  - name: Founders Fund
+  - name: Khosla Ventures
+    aliases: [Khosla]
+
+people:
+  - Sam Altman
+  - Greg Brockman
+  - Jakub Pachocki
+  - Mark Chen
+  - Dario Amodei
+  - Daniela Amodei
+  - Jared Kaplan
+  - Jack Clark
+  - Jan Leike
+  - Andrej Karpathy
+  - Demis Hassabis
+  - Jeff Dean
+  - Elon Musk
+  - Yann LeCun
+  - Arthur Mensch
+  - Aidan Gomez
+  - Ilya Sutskever
+  - Mira Murati
+  - John Schulman
+  - Jensen Huang
+  - Gavin Baker
+  - Brad Gerstner
+  - Jamin Ball
+  - Philippe Laffont
+  - Thomas Laffont
+  - Marc Andreessen
+  - Martin Casado
+  - David George
+  - Roelof Botha
+  - Pat Grady
+  - Sonya Huang
+  - Vinod Khosla
+  - Elad Gil
+  - Sarah Guo
+  - Dylan Patel
+  - Ben Thompson
+  - Doug O'Laughlin
+  - Nathan Labenz
+  - Dwarkesh Patel
+
+podcasts:
+  - name: Dwarkesh Podcast
+    feed_url: https://apple.dwarkesh-podcast.workers.dev/feed.rss
+  - name: Invest Like the Best
+    feed_url: https://feeds.megaphone.fm/investlikethebest
+  - name: Everyday AI Podcast
+    feed_url: https://rss.buzzsprout.com/2175779.rss
+
+match_priority:
+  tier_weights:
+    specific_podcast: 100
+    named_person: 50
+    company: 10

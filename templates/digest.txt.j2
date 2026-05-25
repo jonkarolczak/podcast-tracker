@@ -1,0 +1,31 @@
+{{ heading }}
+{{ subheading }}
+
+{% for ctx in contexts %}
+
+## {{ ctx.n }}. {{ ctx.podcast }}{% if ctx.has_guest %}: {{ ctx.header_guest }}{% endif %}
+
+Podcast: {{ ctx.podcast }}
+Episode: {{ ctx.episode_title }}
+Guests: {{ ctx.guests_display }}
+{% if ctx.role_and_company %}
+Company / role: {{ ctx.role_and_company }}
+{% endif %}
+Date: {{ ctx.date_display }}
+Link: {{ ctx.primary_url if ctx.primary_url else "—" }}
+
+{% if ctx.entry.summary %}
+### Summary
+
+{% for bullet in ctx.entry.summary.bullets %}
+- {{ bullet.point }}
+{% endfor %}
+{% elif ctx.entry.error %}
+Processing error: {{ ctx.entry.error }}
+{% else %}
+Transcript unavailable. Link only.
+{% endif %}
+
+{% else %}
+No new matches in the last 24 hours.
+{% endfor %}
