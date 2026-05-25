@@ -169,21 +169,44 @@ async def search_itunes(
     match_type: MatchType,
     max_results: int = 25,
     lookback_hours: int = 26,
+    max_retries: int = 3,
 ) -> list[EpisodeCandidate]:
-    """iTunes Search API — free, no auth, true full-text episode search."""
+    """iTunes Search API — free, no auth, true full-text episode search.
+
+    Apple rate-limits aggressively (403/429 when fanning out widely). Retries
+    with exponential backoff on 4xx-rate-limit and 5xx.
+    """
     params = {
         "term": query,
         "entity": "podcastEpisode",
         "media": "podcast",
         "limit": max_results,
     }
-    resp = await client.get(
-        ITUNES_SEARCH_BASE,
-        params=params,
-        timeout=DEFAULT_TIMEOUT,
-        headers={"User-Agent": USER_AGENT},
-    )
-    resp.raise_for_status()
+    last_exc: Exception | None = None
+    for attempt in range(max_retries + 1):
+        try:
+            resp = await client.get(
+                ITUNES_SEARCH_BASE,
+                params=params,
+                timeout=DEFAULT_TIMEOUT,
+                headers={"User-Agent": USER_AGENT},
+            )
+            if resp.status_code in (403, 429, 500, 502, 503, 504):
+                if attempt < max_retries:
+                    backoff = 1.0 * (2 ** attempt)
+                    await asyncio.sleep(backoff)
+                    continue
+            resp.raise_for_status()
+            break
+        except httpx.HTTPError as e:
+            last_exc = e
+            if attempt < max_retries:
+                await asyncio.sleep(1.0 * (2 ** attempt))
+                continue
+            raise
+    else:  # pragma: no cover — for/else not entered when break fires
+        if last_exc:
+            raise last_exc
     items = resp.json().get("results") or []
     cutoff = datetime.now(timezone.utc).timestamp() - lookback_hours * 3600
     candidates: list[EpisodeCandidate] = []
@@ -197,29 +220,50 @@ async def search_itunes(
     return candidates
 
 
+async def _discover_via_itunes(
+    queries: list[str],
+    *,
+    match_type: MatchType,
+    lookback_hours: int,
+    concurrency: int = 3,
+) -> list[EpisodeCandidate]:
+    """Fan out iTunes Search queries with a semaphore. Handles errors per-query.
+
+    Apple's iTunes Search rate-limits aggressively. concurrency=3 keeps us
+    polite; bursting higher returns 403s. Per-query retry-with-backoff handles
+    transient rate limits.
+    """
+    semaphore = asyncio.Semaphore(concurrency)
+    async with httpx.AsyncClient() as client:
+        async def _one(name: str) -> list[EpisodeCandidate]:
+            async with semaphore:
+                try:
+                    return await search_itunes(
+                        client, name,
+                        match_type=match_type,
+                        lookback_hours=lookback_hours,
+                    )
+                except httpx.HTTPError as e:
+                    logger.warning("itunes search failed for %r: %s", name, e)
+                    return []
+
+        results = await asyncio.gather(*(_one(n) for n in queries))
+    return [c for batch in results for c in batch]
+
+
 async def discover_by_people(
     people: list[str],
     *,
     lookback_hours: int = 26,
     concurrency: int = 10,
 ) -> list[EpisodeCandidate]:
-    """Fan out byperson queries across all named people in the watchlist."""
-    semaphore = asyncio.Semaphore(concurrency)
-    async with httpx.AsyncClient() as client:
-        async def _one(name: str) -> list[EpisodeCandidate]:
-            async with semaphore:
-                try:
-                    return await search_byperson(
-                        client, name,
-                        match_type="named_person",
-                        lookback_hours=lookback_hours,
-                    )
-                except httpx.HTTPError as e:
-                    logger.warning("byperson failed for %s: %s", name, e)
-                    return []
-
-        results = await asyncio.gather(*(_one(n) for n in people))
-    return [c for batch in results for c in batch]
+    """Fan out iTunes Search across all named people in the watchlist."""
+    return await _discover_via_itunes(
+        people,
+        match_type="named_person",
+        lookback_hours=lookback_hours,
+        concurrency=concurrency,
+    )
 
 
 async def discover_by_companies(
@@ -228,23 +272,13 @@ async def discover_by_companies(
     lookback_hours: int = 26,
     concurrency: int = 10,
 ) -> list[EpisodeCandidate]:
-    """Fan out byperson queries across company names + aliases (it's full-text-ish)."""
-    semaphore = asyncio.Semaphore(concurrency)
-    async with httpx.AsyncClient() as client:
-        async def _one(name: str) -> list[EpisodeCandidate]:
-            async with semaphore:
-                try:
-                    return await search_byperson(
-                        client, name,
-                        match_type="company",
-                        lookback_hours=lookback_hours,
-                    )
-                except httpx.HTTPError as e:
-                    logger.warning("byperson failed for %s: %s", name, e)
-                    return []
-
-        results = await asyncio.gather(*(_one(n) for n in companies))
-    return [c for batch in results for c in batch]
+    """Fan out iTunes Search across company names + aliases."""
+    return await _discover_via_itunes(
+        companies,
+        match_type="company",
+        lookback_hours=lookback_hours,
+        concurrency=concurrency,
+    )
 
 
 def _episode_from_rss_entry(entry, podcast_name: str) -> EpisodeCandidate | None:
@@ -297,10 +331,25 @@ def _parse_itunes_duration(s: str) -> float:
 
 
 def poll_rss_feed(feed_url: str, podcast_name: str, *, lookback_hours: int = 26) -> list[EpisodeCandidate]:
-    """Parse a single RSS feed and return episodes published in the lookback window."""
-    parsed = feedparser.parse(feed_url, agent=USER_AGENT)
+    """Parse a single RSS feed and return episodes published in the lookback window.
+
+    Fetches with httpx (which uses certifi for TLS) then hands the raw bytes to
+    feedparser. This avoids the macOS stdlib-urllib cert verification failure
+    that feedparser.parse(url) hits in some dev environments.
+    """
+    try:
+        with httpx.Client(timeout=DEFAULT_TIMEOUT, follow_redirects=True) as client:
+            resp = client.get(feed_url, headers={"User-Agent": USER_AGENT})
+            resp.raise_for_status()
+            feed_bytes = resp.content
+    except httpx.HTTPError as e:
+        logger.warning("rss fetch failed for %s: %s", feed_url, e)
+        return []
+
+    parsed = feedparser.parse(feed_bytes)
     if getattr(parsed, "bozo", False) and parsed.bozo_exception:
-        logger.warning("feed parse warning for %s: %s", feed_url, parsed.bozo_exception)
+        # feedparser flags many minor issues as bozo; only warn at debug-level
+        logger.debug("feed parse warning for %s: %s", feed_url, parsed.bozo_exception)
     cutoff = datetime.now(timezone.utc).timestamp() - lookback_hours * 3600
     candidates: list[EpisodeCandidate] = []
     for entry in parsed.entries:
@@ -322,20 +371,27 @@ def dedupe(candidates: list[EpisodeCandidate]) -> list[EpisodeCandidate]:
     return list(seen.values())
 
 
+class DiscoveryTotalFailure(RuntimeError):
+    """Raised when ALL discovery surfaces failed. Triggers the failure-digest path."""
+
+
 async def discover_all(
     watchlist: Watchlist,
     *,
     lookback_hours: int = 26,
     already_seen: set[str] | None = None,
 ) -> list[EpisodeCandidate]:
-    """Run all three discovery surfaces, dedupe, drop already-seen."""
+    """Run all three discovery surfaces, dedupe, drop already-seen.
+
+    Raises DiscoveryTotalFailure if every surface failed (so the caller can send
+    a "discovery failed today" digest instead of an empty one).
+    """
     company_queries: list[str] = []
     for company in watchlist.companies:
         company_queries.extend(company.all_names)
 
-    people_task = discover_by_people(watchlist.people, lookback_hours=lookback_hours)
-    companies_task = discover_by_companies(company_queries, lookback_hours=lookback_hours)
     rss_candidates: list[EpisodeCandidate] = []
+    rss_failures = 0
     for podcast in watchlist.podcasts:
         try:
             rss_candidates.extend(poll_rss_feed(
@@ -343,23 +399,45 @@ async def discover_all(
             ))
         except Exception as e:  # noqa: BLE001 — feed parsing can raise many things
             logger.warning("rss poll failed for %s: %s", podcast.name, e)
-
-    people_candidates, company_candidates = await asyncio.gather(
-        people_task, companies_task,
+            rss_failures += 1
+    rss_total_fail = (
+        len(watchlist.podcasts) > 0 and rss_failures == len(watchlist.podcasts)
     )
+
+    try:
+        people_candidates = await discover_by_people(
+            watchlist.people, lookback_hours=lookback_hours,
+        )
+        people_failed = False
+    except Exception as e:  # noqa: BLE001
+        logger.warning("people discovery surface failed: %s", e)
+        people_candidates = []
+        people_failed = True
+
+    try:
+        company_candidates = await discover_by_companies(
+            company_queries, lookback_hours=lookback_hours,
+        )
+        company_failed = False
+    except Exception as e:  # noqa: BLE001
+        logger.warning("company discovery surface failed: %s", e)
+        company_candidates = []
+        company_failed = True
+
+    if rss_total_fail and people_failed and company_failed:
+        raise DiscoveryTotalFailure("all discovery surfaces failed")
 
     all_candidates = rss_candidates + people_candidates + company_candidates
     deduped = dedupe(all_candidates)
+    pre_seen_count = len(deduped)
     if already_seen:
         deduped = [c for c in deduped if c.guid not in already_seen]
     logger.info(
-        "discovery complete",
-        extra={
-            "total_candidates": len(all_candidates),
-            "deduped": len(deduped),
-            "rss_count": len(rss_candidates),
-            "people_count": len(people_candidates),
-            "company_count": len(company_candidates),
-        },
+        "discovery complete: rss=%d people=%d company=%d -> deduped=%d (after seen-filter=%d)",
+        len(rss_candidates),
+        len(people_candidates),
+        len(company_candidates),
+        pre_seen_count,
+        len(deduped),
     )
     return deduped

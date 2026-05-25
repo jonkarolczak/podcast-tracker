@@ -80,18 +80,21 @@ def _title_contains_query(candidate: EpisodeCandidate) -> bool:
     return candidate.match_query.lower() in (candidate.title or "").lower()
 
 
+FILTER_BATCH_SIZE = 40  # ~40 candidates per Haiku call stays well under 30K input tokens
+
+
 def classify(
     candidates: list[EpisodeCandidate],
     *,
     client: anthropic.Anthropic | None = None,
     keep: tuple[str, ...] = ("guest",),
 ) -> list[Episode]:
-    """Classify candidates in one batched Haiku call. Return only those in `keep`.
+    """Classify candidates in batched Haiku calls. Return only those in `keep`.
 
     Three fast-paths skip Haiku entirely:
       1. Specific-podcast matches are trusted by definition.
       2. Title contains the literal query (very strong guest signal).
-      3. After both, the remainder go to Haiku for batch classification.
+      3. After both, the remainder go to Haiku in chunks of FILTER_BATCH_SIZE.
     """
     bypass = [c for c in candidates if c.match_type == "specific_podcast"]
     remaining = [c for c in candidates if c.match_type != "specific_podcast"]
@@ -107,54 +110,57 @@ def classify(
 
     if not needs_filter:
         logger.info(
-            "filter fast-paths consumed all candidates",
-            extra={
-                "bypassed": len(bypass),
-                "title_matched": len(title_match),
-            },
+            "filter fast-paths consumed all candidates: bypassed=%d title_matched=%d",
+            len(bypass), len(title_match),
         )
         return episodes
 
     client = client or anthropic.Anthropic()
     system_prompt = PROMPT_PATH.read_text()
-    user_message = _candidates_xml(needs_filter)
-
-    resp = client.messages.create(
-        model=FILTER_MODEL,
-        max_tokens=2048,
-        temperature=0.0,
-        system=system_prompt,
-        tools=[CLASSIFY_TOOL],
-        tool_choice={"type": "tool", "name": "classify_candidates"},
-        messages=[{"role": "user", "content": user_message}],
-    )
-
-    tool_use_block = next((b for b in resp.content if b.type == "tool_use"), None)
-    if not tool_use_block:
-        logger.error("filter call returned no tool_use block; dropping all non-bypass candidates")
-        return episodes
-
     by_guid = {c.guid: c for c in needs_filter}
-    for cls in tool_use_block.input.get("classifications", []):
-        guid = cls.get("guid")
-        if guid not in by_guid:
+    kept_from_haiku = 0
+
+    for batch_start in range(0, len(needs_filter), FILTER_BATCH_SIZE):
+        batch = needs_filter[batch_start:batch_start + FILTER_BATCH_SIZE]
+        user_message = _candidates_xml(batch)
+        try:
+            resp = client.messages.create(
+                model=FILTER_MODEL,
+                max_tokens=2048,
+                temperature=0.0,
+                system=system_prompt,
+                tools=[CLASSIFY_TOOL],
+                tool_choice={"type": "tool", "name": "classify_candidates"},
+                messages=[{"role": "user", "content": user_message}],
+            )
+        except anthropic.APIError as e:
+            logger.error("filter batch %d-%d call failed: %s",
+                         batch_start, batch_start + len(batch), e)
             continue
-        if cls.get("classification") not in keep:
+
+        tool_use_block = next((b for b in resp.content if b.type == "tool_use"), None)
+        if not tool_use_block:
+            logger.error("filter batch %d returned no tool_use block; dropping this batch",
+                         batch_start)
             continue
-        episodes.append(Episode(
-            candidate=by_guid[guid],
-            filter_confidence=float(cls.get("confidence", 0.5)),
-            priority_score=0.0,
-        ))
+
+        for cls in tool_use_block.input.get("classifications", []):
+            guid = cls.get("guid")
+            if guid not in by_guid:
+                continue
+            if cls.get("classification") not in keep:
+                continue
+            episodes.append(Episode(
+                candidate=by_guid[guid],
+                filter_confidence=float(cls.get("confidence", 0.5)),
+                priority_score=0.0,
+            ))
+            kept_from_haiku += 1
 
     logger.info(
-        "filter complete",
-        extra={
-            "input_count": len(candidates),
-            "bypassed": len(bypass),
-            "needs_filter": len(needs_filter),
-            "kept": len(episodes),
-        },
+        "filter complete: total=%d bypassed=%d title_matched=%d needs_filter=%d kept_by_haiku=%d -> total_kept=%d",
+        len(candidates), len(bypass), len(title_match), len(needs_filter), kept_from_haiku,
+        len(episodes),
     )
     return episodes
 

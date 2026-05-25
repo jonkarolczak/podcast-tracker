@@ -34,10 +34,10 @@ logger = logging.getLogger("tracker")
 from .budget import AnthropicBudget, WallclockExceeded, WallclockGuard, WhisperBudget
 from .config import Settings, Watchlist, load_settings, load_watchlist
 from .delivery import DigestSendError, send_digest
-from .discovery import discover_all, search_byperson, search_itunes
+from .discovery import DiscoveryTotalFailure, discover_all, search_byperson, search_itunes
 from .filters import assign_priority_scores, classify
 from .models import DigestEntry, Episode
-from .render_email import render
+from .render_email import render, render_failure
 from .state import (
     add_seen_episodes,
     already_ran_today,
@@ -127,21 +127,42 @@ async def run_daily(
     watchlist: Watchlist,
     settings: Settings,
     dry_run: bool = False,
+    skip_idempotency_guard: bool = False,
+    lookback_hours: int | None = None,
 ) -> int:
     """The cron path. Returns the exit code."""
-    if already_ran_today():
+    if not skip_idempotency_guard and already_ran_today():
         logger.info("already ran today; exiting cleanly")
         return 0
 
     wallclock_guard = WallclockGuard(settings.budgets.total_wallclock_minutes)
+    lookback = lookback_hours or settings.schedule.lookback_hours
 
     try:
         already_seen = load_seen_guids()
-        candidates = await discover_all(
-            watchlist,
-            lookback_hours=settings.schedule.lookback_hours,
-            already_seen=already_seen,
-        )
+        try:
+            candidates = await discover_all(
+                watchlist,
+                lookback_hours=lookback,
+                already_seen=already_seen,
+            )
+        except DiscoveryTotalFailure as e:
+            run_date = datetime.now(timezone.utc).date()
+            failure_digest = render_failure(run_date, str(e))
+            if dry_run:
+                logger.info("dry run; discovery failed and would send failure email")
+                print(failure_digest.subject)
+                print()
+                print(failure_digest.text)
+                return 0
+            try:
+                send_digest(failure_digest, idempotency_key=f"discovery-fail-{run_date.isoformat()}")
+            except DigestSendError:
+                logger.exception("discovery-failure email failed; state NOT committed")
+                return 2
+            # NOTE: do NOT mark_ran_today() so the next scheduled run retries.
+            return 4
+
         if not candidates:
             entries: list[DigestEntry] = []
         else:
@@ -330,6 +351,10 @@ def main() -> int:
 
     daily = sub.add_parser("daily", help="full daily cron run")
     daily.add_argument("--dry-run", action="store_true")
+    daily.add_argument("--skip-idempotency-guard", action="store_true",
+                       help="re-run even if today's date is already in last_run.txt")
+    daily.add_argument("--lookback-hours", type=int, default=None,
+                       help="override settings.schedule.lookback_hours")
 
     once_search = sub.add_parser("once-search", help="smoke test: search one query, run full pipeline")
     once_search.add_argument("query", type=str)
@@ -346,7 +371,13 @@ def main() -> int:
 
     if args.mode == "daily":
         watchlist = load_watchlist()
-        return asyncio.run(run_daily(watchlist=watchlist, settings=settings, dry_run=args.dry_run))
+        return asyncio.run(run_daily(
+            watchlist=watchlist,
+            settings=settings,
+            dry_run=args.dry_run,
+            skip_idempotency_guard=args.skip_idempotency_guard,
+            lookback_hours=args.lookback_hours,
+        ))
     if args.mode == "once-search":
         return asyncio.run(run_once_search(
             args.query,
