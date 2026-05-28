@@ -79,7 +79,12 @@ async def lookup_episode(
         return None
 
     # Spotify search is full-text; combining title + podcast usually pins the right episode.
-    query = f"{episode_title} {podcast}".strip()
+    # Spotify rejects queries > 250 characters; truncate the title aggressively
+    # since the podcast name is usually the more reliable disambiguator.
+    SPOTIFY_QUERY_MAX = 200  # leave headroom under the 250-char limit
+    title_budget = max(50, SPOTIFY_QUERY_MAX - len(podcast) - 1)
+    truncated_title = (episode_title or "")[:title_budget].strip()
+    query = f"{truncated_title} {podcast}".strip()
     resp = await client.get(
         SEARCH_URL,
         params={"q": query, "type": "episode", "limit": 5, "market": market},

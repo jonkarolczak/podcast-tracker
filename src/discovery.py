@@ -220,23 +220,28 @@ async def search_itunes(
     return candidates
 
 
+ITUNES_BASE_DELAY_SEC = 0.2  # spread requests to ~5 RPS effective rate
+
+
 async def _discover_via_itunes(
     queries: list[str],
     *,
     match_type: MatchType,
     lookback_hours: int,
-    concurrency: int = 3,
+    concurrency: int = 2,
 ) -> list[EpisodeCandidate]:
     """Fan out iTunes Search queries with a semaphore. Handles errors per-query.
 
-    Apple's iTunes Search rate-limits aggressively. concurrency=3 keeps us
-    polite; bursting higher returns 403s. Per-query retry-with-backoff handles
-    transient rate limits.
+    Apple's iTunes Search rate-limits aggressively — production runs hit 429s
+    at concurrency=3 within the first second. concurrency=2 with a 200ms base
+    delay per request gives ~5 effective RPS, well under Apple's threshold.
+    Per-query retry-with-backoff still handles transient 429s.
     """
     semaphore = asyncio.Semaphore(concurrency)
     async with httpx.AsyncClient() as client:
         async def _one(name: str) -> list[EpisodeCandidate]:
             async with semaphore:
+                await asyncio.sleep(ITUNES_BASE_DELAY_SEC)
                 try:
                     return await search_itunes(
                         client, name,
@@ -362,13 +367,96 @@ def poll_rss_feed(feed_url: str, podcast_name: str, *, lookback_hours: int = 26)
     return candidates
 
 
+def _normalize_for_dedup(s: str) -> str:
+    """Lowercase + strip punctuation/whitespace for fuzzy episode matching."""
+    import re
+    s = (s or "").lower()
+    # Collapse runs of non-alphanumeric to a single space, then strip
+    s = re.sub(r"[^\w]+", " ", s).strip()
+    return s
+
+
+def _dedup_key(c: EpisodeCandidate) -> str:
+    """Cross-surface dedup key: normalized (podcast, title prefix).
+
+    Same episode appearing via RSS + iTunes person search has different GUIDs
+    (RSS guid vs itunes:trackId) but the (podcast, title) pair is stable.
+    Title prefix capped at 80 chars to absorb minor formatting differences
+    like trailing "[EP.473]" suffixes.
+    """
+    podcast = _normalize_for_dedup(c.podcast)
+    title = _normalize_for_dedup(c.title)[:80]
+    return f"{podcast}|{title}"
+
+
+def _is_english_ish(s: str) -> bool:
+    """Filter out predominantly non-Latin-script titles (Arabic, CJK, Cyrillic, etc.).
+
+    iTunes US store returns podcasts in many languages. This is a coarse
+    heuristic: count Latin letters vs other letters in the string. We want
+    >= 70% of letter chars to be Latin script.
+    """
+    if not s:
+        return True  # don't filter empty; let downstream decide
+    latin = 0
+    other_letter = 0
+    for ch in s:
+        if ch.isalpha():
+            # Latin if it's in the basic Latin or Latin-1 supplement range
+            if ord(ch) < 0x180 or 0x1E00 <= ord(ch) <= 0x1EFF:
+                latin += 1
+            else:
+                other_letter += 1
+    total_letters = latin + other_letter
+    if total_letters == 0:
+        return True  # e.g. "Ep. 47 - The Show" — accept
+    return (latin / total_letters) >= 0.7
+
+
 def dedupe(candidates: list[EpisodeCandidate]) -> list[EpisodeCandidate]:
-    """Dedupe by GUID, preferring earlier (more authoritative) discovery surfaces."""
-    seen: dict[str, EpisodeCandidate] = {}
+    """Dedupe by GUID and by (podcast, title-prefix).
+
+    Within a dedup-key collision, prefer:
+      1. specific_podcast > named_person > company (more authoritative match)
+      2. RSS-discovered > iTunes-discovered (RSS GUID is canonical)
+    """
+    by_guid: dict[str, EpisodeCandidate] = {}
     for c in candidates:
-        if c.guid not in seen:
-            seen[c.guid] = c
-    return list(seen.values())
+        if c.guid not in by_guid:
+            by_guid[c.guid] = c
+
+    # Now collapse cross-surface duplicates by (podcast, title)
+    tier_rank = {"specific_podcast": 0, "named_person": 1, "company": 2}
+    source_rank = {"rss": 0, "podcastindex_byperson": 1, "itunes_search": 2}
+
+    def _rank(c: EpisodeCandidate) -> tuple[int, int]:
+        return (
+            tier_rank.get(c.match_type, 3),
+            source_rank.get(c.discovered_via, 3),
+        )
+
+    by_key: dict[str, EpisodeCandidate] = {}
+    for c in by_guid.values():
+        key = _dedup_key(c)
+        existing = by_key.get(key)
+        if existing is None or _rank(c) < _rank(existing):
+            by_key[key] = c
+    return list(by_key.values())
+
+
+def filter_english(candidates: list[EpisodeCandidate]) -> list[EpisodeCandidate]:
+    """Drop candidates whose title or podcast name is predominantly non-Latin."""
+    out: list[EpisodeCandidate] = []
+    dropped = 0
+    for c in candidates:
+        # Title is the primary signal; podcast name is secondary
+        if _is_english_ish(c.title) and _is_english_ish(c.podcast):
+            out.append(c)
+        else:
+            dropped += 1
+    if dropped:
+        logger.info("filtered %d non-English candidate(s)", dropped)
+    return out
 
 
 class DiscoveryTotalFailure(RuntimeError):
@@ -430,14 +518,18 @@ async def discover_all(
     all_candidates = rss_candidates + people_candidates + company_candidates
     deduped = dedupe(all_candidates)
     pre_seen_count = len(deduped)
+    deduped = filter_english(deduped)
+    post_english_count = len(deduped)
     if already_seen:
         deduped = [c for c in deduped if c.guid not in already_seen]
     logger.info(
-        "discovery complete: rss=%d people=%d company=%d -> deduped=%d (after seen-filter=%d)",
+        "discovery complete: rss=%d people=%d company=%d -> deduped=%d "
+        "-> english=%d -> after-seen=%d",
         len(rss_candidates),
         len(people_candidates),
         len(company_candidates),
         pre_seen_count,
+        post_english_count,
         len(deduped),
     )
     return deduped
