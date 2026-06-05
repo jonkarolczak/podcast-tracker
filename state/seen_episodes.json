@@ -1024,5 +1024,59 @@
     "first_seen": "2026-06-04T09:15:26.035627-05:00",
     "title": "Ep 791: Microsoft Build Recap: 4 New AI Features That Stood Out",
     "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "substack:post:200613353",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "Alex Imas and Phil Trammell – What remains scarce after AGI?",
+    "podcast": "Dwarkesh Podcast"
+  },
+  {
+    "guid": "Buzzsprout-19298399",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "Ep 792: Autonomous Copilot agents, new Codex tools, Github CoPilot app and 7 more AI updates you should be using",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "itunes:1000771303344",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "AI Agents and the Fight for Customer Data",
+    "podcast": "The a16z Show"
+  },
+  {
+    "guid": "itunes:1000771202597",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "Thomas Laffont: The $4T AI IPO Wave, 2026's Unicorn Economy, and the 10X Paradox",
+    "podcast": "All-In with Chamath, Jason, Sacks & Friedberg"
+  },
+  {
+    "guid": "itunes:1000771217250",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "Anthropic President Daniela  Amodei Talks the Future of Claude",
+    "podcast": "Bloomberg Talks"
+  },
+  {
+    "guid": "itunes:1000771245084",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "Gibt es für Europa und Kanada noch eine Chance auf Unabhängigkeit, Aidan Gomez?",
+    "podcast": "Handelsblatt Disrupt - Der Podcast über die Zukunft der Wirtschaft"
+  },
+  {
+    "guid": "itunes:1000771259030",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "Scott Wylie Returns! Anticipation, System Fit & the Cognitive Edge of Elite Decision-Making {S2 Cognition}",
+    "podcast": "Slappin' Glass Podcast"
+  },
+  {
+    "guid": "itunes:1000770946500",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "Building Search for AI Agents with Exa CEO Will Bryk",
+    "podcast": "AI + a16z"
+  },
+  {
+    "guid": "itunes:1000771190131",
+    "first_seen": "2026-06-05T09:29:01.943747-05:00",
+    "title": "How a reasoning model cracked an 80-year-old math problem - Episode 20",
+    "podcast": "OpenAI Podcast"
   }
 ]
