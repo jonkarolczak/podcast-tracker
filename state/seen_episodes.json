@@ -1132,5 +1132,23 @@
     "first_seen": "2026-06-07T07:40:46.152012-05:00",
     "title": "Cursor Podcast (2026) - Episodio 14 | Selectora Invitada: Stefy Muñoz",
     "podcast": "Cursor Podcast"
+  },
+  {
+    "guid": "Buzzsprout-19310746",
+    "first_seen": "2026-06-08T10:08:05.888266-05:00",
+    "title": "Ep 793: Apple’s WWDC AI plans, U.S. Gov wants equity in Big Tech, OpenAI’s business moves and more",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "itunes:1000771650574",
+    "first_seen": "2026-06-08T10:08:05.888266-05:00",
+    "title": "How CoreWeave Sees the Market for Compute Right Now",
+    "podcast": "Odd Lots"
+  },
+  {
+    "guid": "itunes:1000771635578",
+    "first_seen": "2026-06-08T10:08:05.888266-05:00",
+    "title": "A Cohere Founder on What A.I. Critics Get Wrong",
+    "podcast": "CANADALAND"
   }
 ]
