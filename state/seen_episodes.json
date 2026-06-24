@@ -1624,5 +1624,71 @@
     "first_seen": "2026-06-23T09:16:45.018730-05:00",
     "title": "The Meta AI Hack: Just Ask Nicely",
     "podcast": "Cyberside Chats: Cybersecurity Insights from the Experts"
+  },
+  {
+    "guid": "Buzzsprout-19388598",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "Ep 804: Open Source Surge? Does GLM-5.2 Make Open Source an Enterprise Priority? (Start Here Series Vol 29)",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "Buzzsprout-19394304",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "Ep 805: Codex Record and Replay: How to Teach an Agent Once Your Most Time-Consuming Workflows",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "itunes:1000773905266",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "The God We Deserve: Nonzero's Robert Wright on AI as Humanity's Ultimate Test",
+    "podcast": "\"The Cognitive Revolution\" | AI Builders, Researchers, and Live Player Analysis"
+  },
+  {
+    "guid": "itunes:1000773915828",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "Coatue Founder Philippe Laffont 6/23/26",
+    "podcast": "Squawk Pod"
+  },
+  {
+    "guid": "itunes:1000773985128",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "Infrastructure for AI at Scale - With Benny Chen (Fireworks AI)",
+    "podcast": "The Information Bottleneck"
+  },
+  {
+    "guid": "itunes:1000773931778",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "When millions of AI agents meet",
+    "podcast": "Google DeepMind: The Podcast"
+  },
+  {
+    "guid": "itunes:1000773953780",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "Cerebras $24B backlog masks its extreme valuation",
+    "podcast": "Flash Stock Reports (Video)"
+  },
+  {
+    "guid": "itunes:1000773983550",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "Cerebras (CBRS): Renting back sold chips to fulfill a $20B AI backlog [Q1 2026]",
+    "podcast": "Earnings Unscripted: Stock Earnings Calls & Analysis"
+  },
+  {
+    "guid": "itunes:1000773913501",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "Change One Setting and Claude Gets 10 Times Better",
+    "podcast": "Claude AI Genius Podcast w/ Claude Anthropic Expert Brandon Gaille"
+  },
+  {
+    "guid": "itunes:1000773915262",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "BUZZ HPC joins Bell Canada and Cohere to build Canada’s sovereign AI infrastructure platform",
+    "podcast": "Proactive - Interviews for investors"
+  },
+  {
+    "guid": "itunes:1000773921837",
+    "first_seen": "2026-06-24T09:09:49.056685-05:00",
+    "title": "First Earnings Report for Cerebras 6/23/26",
+    "podcast": "TechCheck"
   }
 ]
