@@ -1816,5 +1816,29 @@
     "first_seen": "2026-06-29T10:05:22.167647-05:00",
     "title": "The Claude Rewrite Loop that Turns a Draft into a Masterpiece",
     "podcast": "Claude AI Genius Podcast w/ Claude Anthropic Expert Brandon Gaille"
+  },
+  {
+    "guid": "Buzzsprout-19417836",
+    "first_seen": "2026-06-30T08:26:53.402787-05:00",
+    "title": "Ep 808: OpenAI’s limited release of GPT-5.6, Mythos starts slow reinstatement, OpenAI gets spicy and more AI news",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "itunes:1000774822151",
+    "first_seen": "2026-06-30T08:26:53.402787-05:00",
+    "title": "Why Hardware-Software Co-Design Is AI's Real 100x: Dylan Patel of SemiAnalysis",
+    "podcast": "Training Data"
+  },
+  {
+    "guid": "itunes:1000774694894",
+    "first_seen": "2026-06-30T08:26:53.402787-05:00",
+    "title": "Mark Zuckerberg Fails at \"Fun\" Hackathon for Meta - AI Destroyed Company Culture",
+    "podcast": "Eli the Computer Guy"
+  },
+  {
+    "guid": "itunes:1000774830375",
+    "first_seen": "2026-06-30T08:26:53.402787-05:00",
+    "title": "How AI Is the Ultimate Horizontal Enabler",
+    "podcast": "AI_Cloud Essentials"
   }
 ]
