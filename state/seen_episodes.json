@@ -2332,5 +2332,35 @@
     "first_seen": "2026-07-14T07:42:00.548076-05:00",
     "title": "Localized Pricing for Claude in India",
     "podcast": "Anthropic News"
+  },
+  {
+    "guid": "Buzzsprout-19490831",
+    "first_seen": "2026-07-15T07:39:22.496280-05:00",
+    "title": "Ep 818: AI Just Went Multiplayer. Slack Is Where It All Comes Together",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "itunes:1000776888410",
+    "first_seen": "2026-07-15T07:39:22.496280-05:00",
+    "title": "Can Anyone Catch NVIDIA? | The Future of Chips and Infrastructure",
+    "podcast": "The a16z Show"
+  },
+  {
+    "guid": "itunes:1000776807796",
+    "first_seen": "2026-07-15T07:39:22.496280-05:00",
+    "title": "Demis Hassabis Has a Watchdog Framework - DTNS 5309",
+    "podcast": "Daily Tech News Show"
+  },
+  {
+    "guid": "itunes:1000776902251",
+    "first_seen": "2026-07-15T07:39:22.496280-05:00",
+    "title": "Demis Hassabis di Google DeepMind propone un organismo per controllare l'intelligenza artificiale supervisionato dagli Stati Uniti d'America: scoppia lo scontro per la sovranità tecnologica",
+    "podcast": "Qualcosa di importante"
+  },
+  {
+    "guid": "itunes:1000776778177",
+    "first_seen": "2026-07-15T07:39:22.496280-05:00",
+    "title": "Mistral AI Releases Robostral Navigate: An 8B Model Enabling Robots to Navigate Complex Environments — 2026-07-14",
+    "podcast": "Impact Vector: AI Tools"
   }
 ]
