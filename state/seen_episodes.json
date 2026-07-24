@@ -2620,5 +2620,41 @@
     "first_seen": "2026-07-23T07:54:57.130118-05:00",
     "title": "Comment Mistral AI est-elle devenue l’un des acteurs les plus convoités de l’Intelligence Artificielle ?",
     "podcast": "La question info"
+  },
+  {
+    "guid": "Buzzsprout-19537678",
+    "first_seen": "2026-07-24T08:04:22.040566-05:00",
+    "title": "Ep 825: New: OpenAI Presence. Has The AI Customer Service Takeover Finally Arrived?",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "itunes:1000778163733",
+    "first_seen": "2026-07-24T08:04:22.040566-05:00",
+    "title": "AI-makten bakom Claude: Daniela Amodei",
+    "podcast": "AW med AI"
+  },
+  {
+    "guid": "itunes:1000778057258",
+    "first_seen": "2026-07-24T08:04:22.040566-05:00",
+    "title": "Looking Back at AI Scaling with Anthropic Co-Founder Jared Kaplan",
+    "podcast": "Nature and Science Podcast"
+  },
+  {
+    "guid": "itunes:1000778023479",
+    "first_seen": "2026-07-24T08:04:22.040566-05:00",
+    "title": "The Biggest Chip Ever Built — Why OpenAI Runs On It | Cerebras CEO Andrew Feldman",
+    "podcast": "The MAD Podcast with Matt Turck"
+  },
+  {
+    "guid": "itunes:1000778026270",
+    "first_seen": "2026-07-24T08:04:22.040566-05:00",
+    "title": "Orchestrating AI video intelligence and evaluation pipelines at Firework",
+    "podcast": "The Data Flowcast: Mastering Apache Airflow ® for Data Engineering and AI"
+  },
+  {
+    "guid": "itunes:1000778180595",
+    "first_seen": "2026-07-24T08:04:22.040566-05:00",
+    "title": "Cohere : pourquoi l’IA souveraine s’exile en Arabie saoudite",
+    "podcast": "Le centre de gravité"
   }
 ]
