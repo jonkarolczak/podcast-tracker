@@ -2782,5 +2782,53 @@
     "first_seen": "2026-07-28T08:42:16.707679-05:00",
     "title": "Serena Williams on winning in business",
     "podcast": "Masters of Scale"
+  },
+  {
+    "guid": "Buzzsprout-19562108",
+    "first_seen": "2026-07-29T08:26:58.735209-05:00",
+    "title": "Ep 828: Anthropic Responds: Why Claude’s CEO didn't sign the open model pact and the real reasons why",
+    "podcast": "Everyday AI Podcast"
+  },
+  {
+    "guid": "itunes:1000778731862",
+    "first_seen": "2026-07-29T08:26:58.735209-05:00",
+    "title": "Sam Altman: \"Never a Better Time to Do a Startup\"",
+    "podcast": "Y Combinator Startup Podcast"
+  },
+  {
+    "guid": "itunes:1000778727536",
+    "first_seen": "2026-07-29T08:26:58.735209-05:00",
+    "title": "Inside OpenAI, Google Gemini & the Next AI Gold Rush With Google DeepMind's Logan Kilpatrick",
+    "podcast": "1st10 Podcast"
+  },
+  {
+    "guid": "itunes:1000778793096",
+    "first_seen": "2026-07-29T08:26:58.735209-05:00",
+    "title": "Together AI: The Fastest-Growing Company in AI Infrastructure",
+    "podcast": "MONTY by March Capital"
+  },
+  {
+    "guid": "itunes:1000778770563",
+    "first_seen": "2026-07-29T08:26:58.735209-05:00",
+    "title": "Big Tech Unites for Open Source AI—and Against Anthropic",
+    "podcast": "The AI Daily Brief: Artificial Intelligence News and Analysis"
+  },
+  {
+    "guid": "itunes:1000778711655",
+    "first_seen": "2026-07-29T08:26:58.735209-05:00",
+    "title": "Special Report: Google DeepMind's Frontier AI Policy Lead Makes Controversial Sh*tpost",
+    "podcast": "Doom Debates!"
+  },
+  {
+    "guid": "itunes:1000778873243",
+    "first_seen": "2026-07-29T08:26:58.735209-05:00",
+    "title": "Is Gemini Actually a Coding Model? Google DeepMind's Ivan Leo Answers",
+    "podcast": "Agents Hour"
+  },
+  {
+    "guid": "itunes:1000778800151",
+    "first_seen": "2026-07-29T08:26:58.735209-05:00",
+    "title": "Anthropic's Controversial Stance on Open Weight Models",
+    "podcast": "AI Applied: Covering AI News, Interviews and Tools - ChatGPT, Midjourney, Gemini, OpenAI, Anthropic"
   }
 ]
