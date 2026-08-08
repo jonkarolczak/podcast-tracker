@@ -2,7 +2,7 @@ anthropic==0.104.1
 exa-py>=1.0,<2
 feedparser==6.0.12
 httpx>=0.27,<1
-yt-dlp>=2026.1.0
+yt-dlp>=2026.3.17
 faster-whisper==1.2.1
 ctranslate2>=4.5,<5
 webvtt-py>=0.5
